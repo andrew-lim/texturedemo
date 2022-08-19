@@ -1,6 +1,6 @@
 # Affine vs Perspective Correct Texture Mapping
 
-![](texturedemo.png)
+![](texturedemo.png)(https://andrew-lim.github.io/texturedemo/texturedemo.htm)
 
 HTML5 canvas demo demonstrating the differences between affine and perspective-correct texture mapping. Affine texture mapping was used in the original Playstation.
 
