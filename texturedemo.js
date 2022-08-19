@@ -63,11 +63,6 @@ class TextureDemo
     }
   }
 
-  toggleTexture()
-  {
-    this.textureIndex = (this.textureIndex+1)%3;
-  }
-
   surfaceNormal(v1, v2, v3)
   {
     let vecAB = vec3.create()
