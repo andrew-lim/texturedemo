@@ -1,0 +1,83 @@
+<!--
+Demonstrates affine and perspective-correct texture mapping using HTML5 canvas.
+See texturedemo.js for main implementation details
+
+Author: Andrew Lim
+https://github.com/andrew-lim/
+-->
+<html>
+<head>
+<title>Texture Test</title>
+<script src="gl-matrix-min.js"></script>
+<script>
+// https://dens.website/tutorials/webgl/gl-matrix
+const {mat2, mat3, mat4, vec2, vec3, vec4} = glMatrix;
+</script>
+<script src="trianglemesh.js"></script>
+<script src="graphics.js"></script>
+<script src="base64texture.js"></script>
+<script src="texturedemo.js"></script>
+<style>
+body {
+  background-color: rgb(25,65,65);
+  height: 100%; overflow: hidden;
+  color: white;
+  font-family: Arial;
+  font-size: 12pt;
+  font-weight: normal;
+}
+table {
+
+}
+#mainCanvas {
+ position : absolute;
+ background-color : black;
+}
+#screen {
+ margin-left: auto;
+ margin-right:auto;
+ /*width: 480px;
+ height: 320px;*/
+ border-top : 4px solid rgb(25,25,25);
+ border-left: 4px solid rgb(25,25,25);
+ border-right: 4px solid #1B625E;
+ border-bottom: 4px solid #1B625E;
+ overflow : hidden;
+}
+</style>
+
+</head>
+<body>
+  <div id="screen" style="width:480px; height: 360px;">
+    <canvas id="mainCanvas"></canvas>
+  </div>
+  <center>
+  <p>
+    Use W or the Up Arrow to move the camera forwards/backwards.<br/>
+    R - reset camera and rotations
+  </p>
+  <table>
+    <tr>
+      <td style="text-align:right">Texture:</td>
+      <td>
+        <div id="div_textures">
+          <!-- <img> tags will be dynamically added here from Base64Texture.getSrcs() -->
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:right">Options :</td>
+      <td>
+        <input type="checkbox" id="cb_wireframe" /><label for="cb_wireframe">Draw Wireframe</label>
+        <input type="checkbox" id="cb_solid" /><label for="cb_solid">Draw Solid Colors</label>
+      </td>
+    </tr>
+  </table>
+  </center>
+  <script type="text/javascript">
+    let demo = new TextureDemo(document.getElementById("mainCanvas"))
+    setTimeout(function() {
+      demo.init()
+    }, 500);
+  </script>
+</body>
