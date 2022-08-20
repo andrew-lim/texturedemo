@@ -1,3 +1,9 @@
+/**
+ * Utility functions to work with ImageData
+ *
+ * Author: Andrew Lim
+ * https://github.com/andrew-lim
+ */
 class Graphics
 {
     /**
@@ -431,8 +437,7 @@ class Graphics
             tex_v = (1.0 - t) * tex_sv + t * tex_ev;
             tex_w = (1.0 - t) * tex_sw + t * tex_ew;
             let pixel = Graphics.getPixelF(textureImageData, tex_u / tex_w, tex_v / tex_w)
-            let rgba = [pixel.r, pixel.g, pixel.b, pixel.a ]
-            Graphics.setPixel(imageData, j, i, rgba[0], rgba[1], rgba[2], rgba[3]);
+            Graphics.setPixel(imageData, j, i, pixel.r, pixel.g, pixel.b, pixel.a);
             t += tstep;
           }
         }
@@ -485,8 +490,7 @@ class Graphics
             tex_v = (1.0 - t) * tex_sv + t * tex_ev;
             tex_w = (1.0 - t) * tex_sw + t * tex_ew;
             let pixel = Graphics.getPixelF(textureImageData, tex_u / tex_w, tex_v / tex_w)
-            let rgba = [pixel.r, pixel.g, pixel.b, pixel.a ]
-            Graphics.setPixel(imageData, j, i, rgba[0], rgba[1], rgba[2], rgba[3]);
+            Graphics.setPixel(imageData, j, i, pixel.r, pixel.g, pixel.b, pixel.a);
             t += tstep;
           }
         }
