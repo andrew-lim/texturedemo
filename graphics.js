@@ -254,10 +254,7 @@ class Graphics
             tex_v = (1.0 - t) * tex_sv + t * tex_ev;
 
             let pixel = Graphics.getPixelF(textureImageData, tex_u, tex_v)
-            let rgba = [pixel.r, pixel.g, pixel.b, pixel.a ]
-
-            Graphics.setPixel(imageData, j, i, rgba[0], rgba[1], rgba[2], rgba[3]);
-
+            Graphics.setPixel(imageData, j, i, pixel.r, pixel.g, pixel.b, pixel.a);
             t += tstep;
           }
         }
@@ -303,10 +300,7 @@ class Graphics
             tex_u = (1.0 - t) * tex_su + t * tex_eu;
             tex_v = (1.0 - t) * tex_sv + t * tex_ev;
             let pixel = Graphics.getPixelF(textureImageData, tex_u, tex_v)
-            let rgba = [pixel.r, pixel.g, pixel.b, pixel.a ]
-
-            Graphics.setPixel(imageData, j, i, rgba[0], rgba[1], rgba[2], rgba[3]);
-
+            Graphics.setPixel(imageData, j, i, pixel.r, pixel.g, pixel.b, pixel.a);
             t += tstep;
           }
         }
