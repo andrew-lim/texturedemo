@@ -11,11 +11,11 @@ class Graphics
      */
     static setPixel(imageData, x, y, r, g, b, a)
     {
-      let index = (x + y * imageData.width) * 4;
-      imageData.data[index+0] = r;
-      imageData.data[index+1] = g;
-      imageData.data[index+2] = b;
-      imageData.data[index+3] = a;
+      let index = (x + y * imageData.width) * 4
+      imageData.data[index+0] = r
+      imageData.data[index+1] = g
+      imageData.data[index+2] = b
+      imageData.data[index+3] = a
     }
 
     static getPixel(imageData, x, y)
@@ -309,7 +309,7 @@ class Graphics
 
     /**
      * Draws a perspective correct textured triangle
-     * See https://github.com/OneLoneCoder/olcPixelGameEngine/blob/master/Videos/OneLoneCoder_PGE_olcEngine3D.cpp
+     * See https://github.com/OneLoneCoder/Javidx9/blob/master/PixelGameEngine/SmallerProjects/OneLoneCoder_PGE_olcEngine3D.cpp
      *
      * imageData is the ImageData to draw on
      * The x, y parameters are the triangle screen vertices
