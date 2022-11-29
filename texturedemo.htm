@@ -13,6 +13,8 @@ https://github.com/andrew-lim/
 // https://dens.website/tutorials/webgl/gl-matrix
 const {mat2, mat3, mat4, vec2, vec3, vec4} = glMatrix;
 </script>
+<script src="vector4f.js"></script>
+<script src="vertex.js"></script>
 <script src="trianglemesh.js"></script>
 <script src="graphics.js"></script>
 <script src="base64texture.js"></script>
@@ -48,14 +50,12 @@ table {
 
 </head>
 <body>
-  <div id="screen" style="width:480px; height: 360px;">
+  <div id="screen" style="">
     <canvas id="mainCanvas"></canvas>
   </div>
   <center>
   <p style="font-size:10pt">
-    Left cube is affine-textured. Right cube is perspective-correct.<br/>
-    Use W or Up keys to move the camera forwards/backwards.<br/>
-    R - reset camera and rotations
+    WASD - move horizontally || QE - move vertically || Arrow Keys - rotate || R - reset camera and rotations
   </p>
   <table>
     <tr>
@@ -69,16 +69,23 @@ table {
     <tr>
       <td style="text-align:right">Options :</td>
       <td>
-        <input type="checkbox" id="cb_wireframe" /><label for="cb_wireframe">Draw Wireframe</label>
-        <input type="checkbox" id="cb_solid" /><label for="cb_solid">Draw Solid Colors</label>
+        <input type="checkbox" id="cb_wireframe" onchange="javascript:this.blur()" checked /><label for="cb_wireframe">Draw Wireframe</label>
+        <input type="checkbox" id="cb_backfaceCulling" onchange="javascript:this.blur()" checked /><label for="cb_backfaceCulling">Backface Culling</label>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:right; vertical-align: top;">Draw Mode:</td>
+      <td>
+        <input type="radio" name="drawmode" id="radioDrawModeSolid" onchange="javascript:this.blur()"/><label for="radioDrawModeSolid">Solid Colors<br/>
+        <input type="radio" name="drawmode" id="radioDrawModeAffine" onchange="javascript:this.blur()"/><label for="radioDrawModeAffine">Affine Textured<br/>
+        <input checked type="radio" name="drawmode" id="radioDrawModePerspective" onchange="javascript:this.blur()"/><label for="radioDrawModePerspective">Perspective Correct Textured<br/>
       </td>
     </tr>
   </table>
   </center>
   <script type="text/javascript">
-    let demo = new TextureDemo(document.getElementById("mainCanvas"))
-    setTimeout(function() {
-      demo.init()
-    }, 500);
+    window.onload = function() {
+      new TextureDemo(document.getElementById("mainCanvas")).init()
+    };
   </script>
 </body>

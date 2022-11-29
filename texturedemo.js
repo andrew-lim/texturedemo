@@ -1,6 +1,8 @@
 /**
  * Demonstrates affine and perspective-correct texture mapping using HTML5 canvas.
  * Requires
+ *   vertex.js
+ *   vector4f.js
  *   graphics.js
  *   trianglemesh.js
  *   base64texture.js
@@ -9,9 +11,20 @@
  * Author: Andrew Lim
  * https://github.com/andrew-lim
  */
+const KEY_LEFT  = 37
+const KEY_RIGHT = 39
+const KEY_UP    = 38
+const KEY_DOWN  = 40
+const KEY_W     = 87
+const KEY_S     = 83
+const KEY_A     = 65
+const KEY_D     = 68
+const KEY_E     = 69
+const KEY_Q     = 81
+
 class TextureDemo
 {
-  constructor(mainCanvas, displayWidth=480, displayHeight=360, textureSize=64, fovDegrees=90)
+  constructor(mainCanvas, displayWidth=640, displayHeight=360, textureSize=64, fovDegrees=90)
   {
     this.mainCanvas = mainCanvas
     this.displayWidth = displayWidth
@@ -19,11 +32,15 @@ class TextureDemo
     this.textureSize = textureSize
     this.fovRadians = fovDegrees * Math.PI / 180
 
+    this.worldX = 0
+    this.worldY = 0
     this.worldZ = -200
     this.cameraMovement = 0
     this.xrot = 0
     this.yrot = 0
     this.zStep = 4
+    this.xStep = this.zStep
+    this.yStep = this.zStep
     this.zMax = -128
 
     this.mainCanvasContext;
@@ -33,7 +50,7 @@ class TextureDemo
     this.textureImageDatas = []
     this.texturesLoadedCount = 0
     this.texturesLoaded = false
-    this.backfaceCullingOn = true
+    this.keys = []
   }
 
  loadImages() {
@@ -63,24 +80,33 @@ class TextureDemo
     }
   }
 
-  surfaceNormal(v1, v2, v3)
+  /**
+   * Calculates the cross-product from 3 vertices but ignores the Z component
+   * Should be used in NDC space
+   *
+   * See https://stackoverflow.com/a/35280392/1645045
+   *
+   * Also see comment by "Arnon Marcus" in this video
+   * https://www.youtube.com/watch?v=h_Aqol0oTs4&lc=UgxpwWe8s2eGiRiBh054AaABAg&ab_channel=ChiliTomatoNoodle
+   */
+  crossProduct2D(a, b, c)
   {
-    let vecAB = vec3.create()
-    let vecAC = vec3.create()
-    vec3.sub(vecAB, v2, v1)
-    vec3.sub(vecAC, v3, v1)
-    let crossProduct = vec3.create()
-    vec3.cross(crossProduct, vecAB, vecAC)
-    let normalized = vec3.create()
-    vec3.normalize(normalized, crossProduct)
-    return normalized
+    const ax = b[0] - a[0]
+    const bx = c[0] - a[0]
+    const ay = b[1] - a[1]
+    const by = c[1] - a[1]
+    // [ ax bx
+    //   ay by ]
+    return ax * by - ay * bx
   }
 
+  /**
+   * Chain mat4.multiply calls
+   */
   multiplyMat4s(mat4s)
   {
     let r = mat4.create()
-    for (let i=0; i<mat4s.length; ++i) {
-      let m = mat4s[i]
+    for (let m of mat4s) {
       mat4.multiply(r, r, m)
     }
     return r
@@ -125,6 +151,7 @@ class TextureDemo
     t = Triangle.create(leftX, topY, frontZ, leftX, bottomY, frontZ, rightX, topY, frontZ, pink);
     t.setTexUVs(0.0, 0.0, 0.0, 1.0, 1.0, 0.0);
     mesh.addTriangle(t)
+
     t = Triangle.create(leftX, bottomY, frontZ, rightX, bottomY, frontZ, rightX, topY, frontZ, pink);
     t.setTexUVs(0.0, 1.0, 1.0, 1.0, 1.0, 0.0);
     mesh.addTriangle(t)
@@ -181,9 +208,9 @@ class TextureDemo
   }
 
   init() {
-    this.loadImages()
-    this.bindKeys();
     this.initScreen();
+    this.bindKeys();
+    this.loadImages()
     this.gameCycle();
   }
 
@@ -193,21 +220,33 @@ class TextureDemo
     let yNDC = point[1]
     let zNDC = point[2]
 
-    // (px/2)xd + ox
-    // (py/2)yd + oy
-    let ox = windowWidth  / 2
-    let oy = (1.0 - 2*yNDC) * windowHeight/2
-    let xWindow = windowWidth /  2 * xNDC + ox
-    let yWindow = windowHeight / 2 * yNDC + oy
-    let zWindow = zNDC
+    // Hack to make sure right and bottom edges are really clipped
+    // to prevent drawing outside viewport
+    windowWidth = windowWidth-1
+    windowHeight = windowHeight-1
 
+    let xWindow = Math.trunc(windowWidth/2*xNDC + windowWidth/2)
+    let yWindow = Math.trunc((-yNDC)*windowHeight/2 + windowHeight/2)
+    let zWindow = zNDC
     return [xWindow, yWindow, zWindow]
   }
 
   initScreen() {;
+    // this.mainCanvasContext = this.mainCanvas.getContext('2d');
+    // this.mainCanvas.width = this.displayWidth;
+    // this.mainCanvas.height = this.displayHeight;
+
+    const SCREEN_WIDTH = this.displayWidth//848
+    const SCREEN_HEIGHT = this.displayHeight // 480
+
     this.mainCanvasContext = this.mainCanvas.getContext('2d');
-    this.mainCanvas.width = this.displayWidth;
-    this.mainCanvas.height = this.displayHeight;
+    let screen = document.getElementById("screen");
+    this.mainCanvas.width = (this.displayWidth);
+    this.mainCanvas.height = (this.displayHeight);
+    screen.style.width = (SCREEN_WIDTH) + "px";
+    screen.style.height = (SCREEN_HEIGHT) + "px";
+    this.mainCanvas.style.width = SCREEN_WIDTH
+    this.mainCanvas.style.height = SCREEN_HEIGHT
   }
 
   // bind keyboard events to game functions (movement, etc)
@@ -215,54 +254,55 @@ class TextureDemo
     let this2 = this
     document.onkeydown = function(e) {
       e = e || window.event;
+      this2.keys[e.keyCode] = true
       switch (e.keyCode) { // which key was pressed?
         case 82: // R - reset payer
           this2.xrot = 0
           this2.yrot = 0
           this2.worldZ = -200
-          break;
-        case 38: // up
-        case 87: // W - move forwards
-          this2.cameraMovement = 1;
-          break;
-        case 40: // down
-        case 83: // S - move backwards
-          this2.cameraMovement = -1;
+          this2.worldX = 0
+          this2.worldY = 0
           break;
       }
     }
 
     document.onkeyup = function(e) {
       e = e || window.event;
-      switch (e.keyCode) {
-        case 38: // Up
-        case 40: // Down
-        case 87: // W
-        case 83: // S
-          this2.cameraMovement = 0; // stop the player movement when W/S keys are released
-          break;
-        case 66: // B
-          this2.backfaceCullingOn = !this2.backfaceCullingOn
-          break
-      }
+      this2.keys[e.keyCode] = false
     }
   }
 
   move() {
-    if (this.cameraMovement == 1) {
-      let newY = this.worldZ + this.zStep
-      if (newY < this.zMax) {
-        this.worldZ = newY;
-      }
+    if (this.keys[KEY_W]) {
+      this.worldZ += this.zStep;
     }
-    else if (this.cameraMovement == -1) {
-      let newY = this.worldZ - this.zStep
-      if (newY < this.zMax) {
-        this.worldZ = newY;
-      }
+    else if (this.keys[KEY_S]) {
+      this.worldZ -= this.zStep;
     }
-    this.xrot += 1
-    this.yrot += 1
+    if (this.keys[KEY_A]) {
+      this.worldX += this.xStep
+    }
+    if (this.keys[KEY_D]) {
+      this.worldX -= this.xStep
+    }
+    if (this.keys[KEY_E]) {
+      this.worldY += this.yStep
+    }
+    if (this.keys[KEY_Q]) {
+      this.worldY -= this.yStep
+    }
+    if (this.keys[KEY_LEFT]) {
+      this.yrot += -1
+    }
+    if (this.keys[KEY_RIGHT]) {
+      this.yrot += 1
+    }
+    if (this.keys[KEY_UP]) {
+      this.xrot += -1
+    }
+    if (this.keys[KEY_DOWN]) {
+      this.xrot += 1
+    }
     this.xrot = this.xrot % 360
     this.yrot = this.yrot % 360
   }
@@ -273,103 +313,286 @@ class TextureDemo
       this.drawWorld();
     }
     var this2 = this
-    setTimeout(function() {
+    window.requestAnimationFrame(function(){
       this2.gameCycle()
-    },1000/30);
+    });
+  }
+
+  /**
+   * Clips the given triangles by all the X/Y/Z planes and returns
+   * the resulting new triangles
+   */
+  clipTrianglesByAllPlanes(triangles)
+  {
+    triangles = this.clipTrianglesByPlane(triangles, 0, 1)  //  x
+    triangles = this.clipTrianglesByPlane(triangles, 0, -1) // -x
+    triangles = this.clipTrianglesByPlane(triangles, 1, 1)  //  y
+    triangles = this.clipTrianglesByPlane(triangles, 1, -1) // -y
+    triangles = this.clipTrianglesByPlane(triangles, 2, 1)  //  z
+    triangles = this.clipTrianglesByPlane(triangles, 2, -1) // -z
+    return triangles
+  }
+
+  /**
+   * Clips the given triangles by a single plane
+   * @param ixyz      0/1/2 for x/y/z planes respectively
+   * @param planeSign 1 for positive plane, -1 for negative plane
+   */
+  clipTrianglesByPlane(triangles, ixyz, planeSign)
+  {
+    let triangles2 = []
+    for (let t of triangles) {
+      triangles2.push(...this.clipTriangle(t, ixyz, planeSign))
+    }
+    return triangles2
+  }
+
+  /**
+   * Clips a Triangle by one of the xyz planes
+   * @param triangle  Triangle to clip
+   * @param ixyz      0/1/2 for x/y/z planes respectively
+   * @param planeSign 1 for positive plane, -1 for negative plane
+   * @return new triangles clipped from original
+   */
+  clipTriangle(triangle, ixyz, planeSign)
+  {
+    let triangles = []
+
+    let insidePoints = []
+    let outsidePoints = []
+    let insideIndices = []
+    let outsideIndices = []
+
+    const xyz1 = triangle.getPoint(0).get(ixyz)
+    const xyz2 = triangle.getPoint(1).get(ixyz)
+    const xyz3 = triangle.getPoint(2).get(ixyz)
+
+    const w1 = triangle.getPointW(0)
+    const w2 = triangle.getPointW(1)
+    const w3 = triangle.getPointW(2)
+
+    const point1 = triangle.getPoint(0)
+    const point2 = triangle.getPoint(1)
+    const point3 = triangle.getPoint(2)
+
+    // -w <= x,y,z
+    if (planeSign < 0) {
+      if (xyz1 < -w1) {
+        outsidePoints.push(point1)
+        outsideIndices.push(0)
+      }
+      else {
+        insidePoints.push(point1)
+        insideIndices.push(0)
+      }
+      if (xyz2 < -w2) {
+        outsidePoints.push(point2)
+        outsideIndices.push(1)
+      }
+      else {
+        insidePoints.push(point2)
+        insideIndices.push(1)
+      }
+      if (xyz3 < -w3) {
+        outsidePoints.push(point3)
+        outsideIndices.push(2)
+      }
+      else {
+        insidePoints.push(point3)
+        insideIndices.push(2)
+      }
+    }
+
+    // x,y,z >= w
+    else if (planeSign > 0) {
+      if (xyz1 > w1) {
+        outsidePoints.push(point1)
+        outsideIndices.push(0)
+      }
+      else {
+        insidePoints.push(point1)
+        insideIndices.push(0)
+      }
+      if (xyz2 > w2) {
+        outsidePoints.push(point2)
+        outsideIndices.push(1)
+      }
+      else {
+        insidePoints.push(point2)
+        insideIndices.push(1)
+      }
+      if (xyz3 > w3) {
+        outsidePoints.push(point3)
+        outsideIndices.push(2)
+      }
+      else {
+        insidePoints.push(point3)
+        insideIndices.push(2)
+      }
+    }
+
+    if (3==outsidePoints.length) {
+      // Triangle is outside this plane
+    }
+
+    else if (3==insidePoints.length) {
+      // Triangle is completely inside this plane
+      triangles.push(triangle)
+    }
+
+    // 2 points outside, create a smaller triangle
+    else if (2==outsidePoints.length && 1==insidePoints.length) {
+      const a = insidePoints[0]
+      const b = outsidePoints[0]
+      const c = outsidePoints[1]
+      const ai = insideIndices[0]
+      const bi = outsideIndices[0]
+      const bt = Vertex.findLerpFactor(b, a, ixyz, planeSign)
+      const ct = Vertex.findLerpFactor(c, a, ixyz, planeSign)
+      const b1 = b.lerp(a, bt)
+      const c1 = c.lerp(a, ct)
+
+      // Preserve winding order
+      // B follows A
+      if ( ((ai+1)%3)==bi ) {
+         triangles.push(Triangle.createFromVertices(a, b1, c1))
+      }
+      // C follows A
+      else {
+         triangles.push(Triangle.createFromVertices(a, c1, b1))
+      }
+    }
+
+    // 1 point outside, create 2 smaller triangles
+    else if (1==outsidePoints.length && 2==insidePoints.length) {
+      const a = insidePoints[0]
+      const b = outsidePoints[0]
+      const c = insidePoints[1]
+      const ai = insideIndices[0]
+      const bi = outsideIndices[0]
+      const abt = Vertex.findLerpFactor(b, a, ixyz, planeSign)
+      const cbt = Vertex.findLerpFactor(b, c, ixyz, planeSign)
+      const a1 = b.lerp(a, abt)
+      const c1 = b.lerp(c, cbt)
+
+      // Preserve winding order
+      // B follows A
+      if ( ((ai+1)%3)==bi ) {
+        triangles.push(Triangle.createFromVertices(a, a1, c1))
+        triangles.push(Triangle.createFromVertices(a, c1, c))
+      }
+      // C follows A
+      else {
+        triangles.push(Triangle.createFromVertices(a, c, c1))
+        triangles.push(Triangle.createFromVertices(a, c1, a1))
+      }
+    }
+
+    return triangles
   }
 
   drawWorld()
   {
     this.mesh = this.createMesh()
-    this.screenImageData = this.mainCanvasContext.createImageData(this.displayWidth, this.displayHeight);
+    if (!this.screenImageData) {
+      this.screenImageData = this.mainCanvasContext.createImageData(this.displayWidth, this.displayHeight);
+      this.blankImageData  = this.mainCanvasContext.createImageData(this.displayWidth, this.displayHeight);
+    }
 
-    for (let count=0; count<2; count++) {
-      for (let i=0; i<this.mesh.triangles.length; ++i) {
-        let t = this.mesh.triangles[i]
+    // Clear the screen data
+    this.screenImageData.data.set(this.blankImageData.data)
 
-        // Triangle Vertex Coordinates
-        let v1 = vec4.fromValues(t.getPointX(0), t.getPointY(0), t.getPointZ(0), 1)
-        let v2 = vec4.fromValues(t.getPointX(1), t.getPointY(1), t.getPointZ(1), 1)
-        let v3 = vec4.fromValues(t.getPointX(2), t.getPointY(2), t.getPointZ(2), 1)
+    for (let i=0; i<this.mesh.triangles.length; ++i) {
+      let t = this.mesh.triangles[i]
 
-        // Create ModelView Matriz
-        let translate = mat4.create()
-        mat4.fromTranslation(translate, [0,0,this.worldZ])
-        let modelViewMatrix = translate
+      // Create ModelView Matriz
+      let translate = mat4.create()
+      mat4.fromTranslation(translate, [this.worldX, this.worldY, this.worldZ])
+      let modelViewMatrix = translate
 
-        // Create Projection Matrix
-        let proj = mat4.create();
-        mat4.perspective(proj, this.fovRadians, (this.displayWidth/2)/this.displayHeight,  0.1, 1000)
+      // Create Projection Matrix
+      let proj = mat4.create();
+      mat4.perspective(proj, this.fovRadians, (this.displayWidth)/(this.displayHeight), 1, 1000)
 
-        // Combine Projection and ModelView Matrices
-        let modelViewProjectionMatrix = this.multiplyMat4s([proj, modelViewMatrix])
+      // Combine Projection and ModelView Matrices
+      let modelViewProjectionMatrix = this.multiplyMat4s([proj, modelViewMatrix])
 
-        // Apply Projection and ModelView to get clipped vertices
-        let clip1 = vec4.create()
-        let clip2 = vec4.create()
-        let clip3 = vec4.create()
-        vec4.transformMat4(clip1, v1, modelViewProjectionMatrix)
-        vec4.transformMat4(clip2, v2, modelViewProjectionMatrix)
-        vec4.transformMat4(clip3, v3, modelViewProjectionMatrix)
+      // Triangle Vertex Coordinates
+      let v1 = t.getPoint(0).getPos().getArray()
+      let v2 = t.getPoint(1).getPos().getArray()
+      let v3 = t.getPoint(2).getPos().getArray()
 
+      // Apply Projection and ModelView to get clip coordinates
+      let clip1 = vec4.create()
+      let clip2 = vec4.create()
+      let clip3 = vec4.create()
+      vec4.transformMat4(clip1, v1, modelViewProjectionMatrix)
+      vec4.transformMat4(clip2, v2, modelViewProjectionMatrix)
+      vec4.transformMat4(clip3, v3, modelViewProjectionMatrix)
+
+      // Create a triangle with clip coordinates
+      let clipVertex1 = new Vertex(Vector4f.createFromVec4(clip1), t.getTexCoord(0))
+      let clipVertex2 = new Vertex(Vector4f.createFromVec4(clip2), t.getTexCoord(1))
+      let clipVertex3 = new Vertex(Vector4f.createFromVec4(clip3), t.getTexCoord(2))
+      let triangleToClip = Triangle.createFromVertices(clipVertex1, clipVertex2, clipVertex3)
+      triangleToClip.color = t.color
+
+      // Clip the triangle to the frustrum volume
+      let clippedTriangles = this.clipTrianglesByAllPlanes([triangleToClip])
+
+      for( let triangle of clippedTriangles) {
         // Perspective Division to get NDC
-        let ndc1 = this.clipToNDC(clip1)
-        let ndc2 = this.clipToNDC(clip2)
-        let ndc3 = this.clipToNDC(clip3)
+        let divide = true
+        let ndc1 = this.clipToNDC(triangle.getPoint(0).getPos().getArray(), divide)
+        let ndc2 = this.clipToNDC(triangle.getPoint(1).getPos().getArray(), divide)
+        let ndc3 = this.clipToNDC(triangle.getPoint(2).getPos().getArray(), divide)
 
         // Backface Culling Check
-        if (this.backfaceCullingOn && this.surfaceNormal(ndc1, ndc2, ndc3)[2]<0) {
+        let backfaceCullingOn = document.getElementById("cb_backfaceCulling").checked
+        if (backfaceCullingOn && this.crossProduct2D(ndc1, ndc2, ndc3)<0) {
           continue;
         }
 
-        // NDC to Window Coordinates
-        let win1 = this.ndcToWindow(ndc1, this.displayWidth/2, this.displayHeight)
-        let win2 = this.ndcToWindow(ndc2, this.displayWidth/2, this.displayHeight)
-        let win3 = this.ndcToWindow(ndc3, this.displayWidth/2, this.displayHeight)
+        // // NDC to Window Coordinates
+        const viewWidth = this.displayWidth
+        const viewHeight = this.displayHeight
+        let win1 = this.ndcToWindow(ndc1, viewWidth, viewHeight)
+        let win2 = this.ndcToWindow(ndc2, viewWidth, viewHeight)
+        let win3 = this.ndcToWindow(ndc3, viewWidth, viewHeight)
 
-        if (document.getElementById("cb_solid").checked) {
+        let textureImageData = this.textureImageDatas[this.textureIndex]
+
+        if (document.getElementById("radioDrawModeSolid").checked) {
           Graphics.fillTriangle(this.screenImageData,
                                 win1[0], win1[1],
                                 win2[0], win2[1],
-                                win3[0], win3[1], t.color);
+                                win3[0], win3[1], triangleToClip.color);
+        }
+
+        else if (document.getElementById("radioDrawModeAffine").checked) {
+          Graphics.affineTexturedTriangle(this.screenImageData,
+                                win1[0], win1[1], triangle.getTexU(0), triangle.getTexV(0),
+                                win2[0], win2[1], triangle.getTexU(1), triangle.getTexV(1),
+                                win3[0], win3[1], triangle.getTexU(2), triangle.getTexV(2),
+                                textureImageData);
+
         }
         else {
-          let textureImageData = this.textureImageDatas[this.textureIndex]
-
-          // Draw affine textured mesh
-          if (count == 0) {
-            Graphics.affineTexturedTriangle(this.screenImageData,
-                                            win1[0], win1[1], t.getTexU(0), t.getTexV(0),
-                                            win2[0], win2[1], t.getTexU(1), t.getTexV(1),
-                                            win3[0], win3[1], t.getTexU(2), t.getTexV(2),
-                                            textureImageData);
-          }
-          // Draw perspective correct textured mesh
-          else {
-            Graphics.texturedTriangle(this.screenImageData,
-                                      win1[0], win1[1], t.getTexU(0), t.getTexV(0), clip1[3],
-                                      win2[0], win2[1], t.getTexU(1), t.getTexV(1), clip2[3],
-                                      win3[0], win3[1], t.getTexU(2), t.getTexV(2), clip3[3],
-                                      textureImageData);
-          }
+          Graphics.texturedTriangle(this.screenImageData,
+                                    win1[0], win1[1], triangle.getTexU(0), triangle.getTexV(0), triangle.getPoint(0).getW(),
+                                    win2[0], win2[1], triangle.getTexU(1), triangle.getTexV(1), triangle.getPoint(1).getW(),
+                                    win3[0], win3[1], triangle.getTexU(2), triangle.getTexV(2), triangle.getPoint(2).getW(),
+                                    textureImageData);
         }
 
         if (document.getElementById("cb_wireframe").checked) {
-          Graphics.drawTriangleWireframe(this.screenImageData, win1[0], win1[1], win2[0], win2[1], win3[0], win3[1], [255, 0, 255, 255]);
+          Graphics.drawTriangleWireframe(this.screenImageData, win1[0], win1[1], win2[0], win2[1], win3[0], win3[1], [255, 255, 0, 255]);
         }
+      } // for trianglesToDraw
 
 
-      } // this.mesh.triangles.length
+    } // this.mesh.triangles.length
 
-      // Draw affine textured mesh on the left
-      if (count ==0 ) {
-        this.mainCanvasContext.putImageData(this.screenImageData, 0, 0);
-      }
-      // Draw perspective-correct textured mesh on the right
-      else {
-        this.mainCanvasContext.putImageData(this.screenImageData, this.displayWidth/2, 0);
-      }
-
-    } // count
+    this.mainCanvasContext.putImageData(this.screenImageData, 0, 0);
   }
 }
