@@ -278,7 +278,7 @@ class Graphics
           u:(bot.u - mid2.u) / Math.abs(dymidbot),
           v:(bot.v - mid2.v) / Math.abs(dymidbot)
         }
-        for (let y=Math.trunc(mid.y); y<=bot.y; y++) {
+        for (let y=mid.y; y<=bot.y; y++) {
           const ysteps  = y - mid.y
 
           // Left Point
@@ -457,7 +457,7 @@ class Graphics
           v:(bot.v - mid2.v) / Math.abs(dymidbot),
           w:(bot.w - mid2.w) / Math.abs(dymidbot)
         }
-        for (let y=Math.trunc(mid.y); y<=bot.y; y++) {
+        for (let y=mid.y; y<=bot.y; y++) {
           const ysteps  = y - mid.y
 
           // Left Point
