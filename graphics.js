@@ -1,3 +1,4 @@
+'use strict'
 /**
  * Utility functions to work with ImageData
  *
@@ -180,128 +181,128 @@ class Graphics
 
       let tmp = 0;
 
-      if (y2 < y1) {
-        tmp = y1; y1 = y2; y2 = tmp;
-        tmp = x1; x1 = x2; x2 = tmp;
-        tmp = u1; u1 = u2; u2 = tmp;
-        tmp = v1; v1 = v2; v2 = tmp;
+      let top = {x:x1, y:y1, u:u1, v:v1}
+      let mid = {x:x2, y:y2, u:u2, v:v2}
+      let bot = {x:x3, y:y3, u:u3, v:v3}
+
+      // Sort the points vertically
+      if (mid.y < top.y) {
+        tmp=mid; mid=top; top=tmp;
+      }
+      if (bot.y < top.y) {
+        tmp=bot; bot=top; top=tmp;
+      }
+      if (bot.y < mid.y) {
+        tmp=bot; bot=mid; mid=tmp;
       }
 
-      if (y3 < y1) {
-        tmp = y1; y1 = y3; y3 = tmp;
-        tmp = x1; x1 = x3; x3 = tmp;
-        tmp = u1; u1 = u3; u3 = tmp;
-        tmp = v1; v1 = v3; v3 = tmp;
+      const dytopmid = mid.y - top.y  // Top to Mid
+      const dytopbot = bot.y - top.y  // Top to Bottom
+      const dymidbot = bot.y - mid.y  // Mid to Bottom
+
+      // Check if triangle has 0 height
+      if (dytopbot == 0) {
+        return
       }
 
-      if (y3 < y2) {
-        tmp = y2; y2 = y3; y3 = tmp;
-        tmp = x2; x2 = x3; x3 = tmp;
-        tmp = u2; u2 = u3; u3 = tmp;
-        tmp = v2; v2 = v3; v3 = tmp;
+      // Top to Bottom Steps
+      const topbotstep = {
+        x:(bot.x - top.x) / Math.abs(dytopbot),
+        u:(bot.u - top.u) / Math.abs(dytopbot),
+        v:(bot.v - top.v) / Math.abs(dytopbot)
       }
 
-      let dy1 = y2 - y1
-      let dx1 = x2 - x1
-      let dv1 = v2 - v1
-      let du1 = u2 - u1
+      // The middle point on the top-bottom line
+      let mid2 = { x: Math.trunc(top.x+dytopmid*topbotstep.x),
+                   y: top.y+dytopmid,
+                   u: top.u+dytopmid*topbotstep.u,
+                   v: top.v+dytopmid*topbotstep.v }
 
-      let dy2 = y3 - y1
-      let dx2 = x3 - x1
-      let dv2 = v3 - v1
-      let du2 = u3 - u1
+      // Make sure mid is left of mid2 because we will
+      // draw the horizontal scan line from left-to-right
+      if (mid.x > mid2.x) {
+        tmp=mid; mid=mid2; mid2=tmp;
+      }
 
-      let tex_u, tex_v;
+      // Top Half Triangle
+      if (dytopmid) {
+        const leftStep = {
+          x:(mid.x - top.x) / Math.abs(dytopmid),
+          u:(mid.u - top.u) / Math.abs(dytopmid),
+          v:(mid.v - top.v) / Math.abs(dytopmid)
+        }
+        const rightStep = {
+          x:(mid2.x - top.x) / Math.abs(dytopmid),
+          u:(mid2.u - top.u) / Math.abs(dytopmid),
+          v:(mid2.v - top.v) / Math.abs(dytopmid)
+        }
 
-      let dax_step = 0, dbx_step = 0;
-      let du1_step = 0, dv1_step = 0;
-      let du2_step = 0, dv2_step = 0;
+        for (let y=top.y; y<=mid.y; y++) {
+          const ysteps = y-top.y
 
-      if (dy1) dax_step = dx1 / Math.abs(dy1)
-      if (dy2) dbx_step = dx2 / Math.abs(dy2)
+          // Left Point
+          const left = { x: Math.trunc(top.x+ysteps*leftStep.x),
+                         u: top.u+ysteps*leftStep.u,
+                         v: top.v+ysteps*leftStep.v }
 
-      if (dy1) du1_step = du1 / Math.abs(dy1)
-      if (dy1) dv1_step = dv1 / Math.abs(dy1)
+          // Right Point
+          const right = { x: Math.trunc(top.x+ysteps*rightStep.x ),
+                          u: top.u+ysteps*rightStep.u,
+                          v: top.v+ysteps*rightStep.v }
 
-      if (dy2) du2_step = du2 / Math.abs(dy2)
-      if (dy2) dv2_step = dv2 / Math.abs(dy2)
-
-      if (dy1) {
-        for (let i = Math.trunc(y1); i <= y2; i++) {
-          let ax = Math.trunc( x1 + (i - y1) * dax_step )
-          let bx = Math.trunc( x1 + (i - y1) * dbx_step )
-
-          let tex_su = u1 + (i - y1) * du1_step;
-          let tex_sv = v1 + (i - y1) * dv1_step;
-
-          let tex_eu = u1 + (i - y1) * du2_step;
-          let tex_ev = v1 + (i - y1) * dv2_step;
-
-          if (ax > bx) {
-            tmp = ax; ax = bx; bx = tmp;
-            tmp = tex_su; tex_su = tex_eu; tex_eu = tmp;
-            tmp = tex_sv; tex_sv = tex_ev; tex_ev = tmp;
-          }
-
-          tex_u = tex_su;
-          tex_v = tex_sv;
-
-          let tstep = 1.0 / (bx - ax);
-          let t = 0.0;
-
-          for (let j = ax; j < bx; j++) {
-            tex_u = (1.0 - t) * tex_su + t * tex_eu;
-            tex_v = (1.0 - t) * tex_sv + t * tex_ev;
-
-            let pixel = Graphics.getPixelF(textureImageData, tex_u, tex_v)
-            Graphics.setPixel(imageData, j, i, pixel.r, pixel.g, pixel.b, pixel.a);
-            t += tstep;
+          // Draw the horizontal line between left and right
+          const dx = right.x-left.x
+          if (dx!=0) {
+            const ustep = (right.u-left.u) / dx
+            const vstep = (right.v-left.v) / dx
+            for (let x=left.x; x<right.x; x++) {
+              const xsteps = x-left.x
+              const u = left.u + xsteps * ustep
+              const v = left.v + xsteps * vstep
+              const pixel = Graphics.getPixelF(textureImageData, u, v)
+              Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
+            }
           }
         }
       }
 
-      dy1 = y3 - y2;
-      dx1 = x3 - x2;
-      dv1 = v3 - v2;
-      du1 = u3 - u2;
+      // Bottom Half Triangle
+      if (dymidbot) {
+        const leftStep = {
+          x:(bot.x - mid.x) / Math.abs(dymidbot),
+          u:(bot.u - mid.u) / Math.abs(dymidbot),
+          v:(bot.v - mid.v) / Math.abs(dymidbot)
+        }
+        const rightStep = {
+          x:(bot.x - mid2.x) / Math.abs(dymidbot),
+          u:(bot.u - mid2.u) / Math.abs(dymidbot),
+          v:(bot.v - mid2.v) / Math.abs(dymidbot)
+        }
+        for (let y=Math.trunc(mid.y); y<=bot.y; y++) {
+          const ysteps  = y - mid.y
 
-      if (dy1) dax_step = dx1 / Math.abs(dy1);
-      if (dy2) dbx_step = dx2 / Math.abs(dy2);
+          // Left Point
+          const left = { x: Math.trunc(mid.x+ysteps*leftStep.x),
+                         u: mid.u+ysteps*leftStep.u,
+                         v: mid.v+ysteps*leftStep.v }
 
-      du1_step = 0;
-      dv1_step = 0;
-      if (dy1) du1_step = du1 / Math.abs(dy1);
-      if (dy1) dv1_step = dv1 / Math.abs(dy1);
+          // Right Point
+          const right = { x: Math.trunc(mid2.x+ysteps*rightStep.x ),
+                          u: mid2.u+ysteps*rightStep.u,
+                          v: mid2.v+ysteps*rightStep.v }
 
-      if (dy1) {
-        for (let i = Math.trunc(y2); i <= y3; i++) {
-          let ax = Math.trunc( x2 + (i - y2) * dax_step )
-          let bx = Math.trunc( x1 + (i - y1) * dbx_step )
-
-          let tex_su = u2 + (i - y2) * du1_step;
-          let tex_sv = v2 + (i - y2) * dv1_step;
-
-          let tex_eu = u1 + (i - y1) * du2_step;
-          let tex_ev = v1 + (i - y1) * dv2_step;
-
-          if (ax > bx) {
-            tmp = ax; ax = bx; bx = tmp;
-            tmp = tex_su; tex_su = tex_eu; tex_eu = tmp;
-            tmp = tex_sv; tex_sv = tex_ev; tex_ev = tmp;
-          }
-
-          tex_u = tex_su;
-          tex_v = tex_sv;
-
-          let tstep = 1.0 / (bx - ax);
-          let t = 0.0;
-
-          for (let j = ax; j < bx; j++) {
-            tex_u = (1.0 - t) * tex_su + t * tex_eu;
-            tex_v = (1.0 - t) * tex_sv + t * tex_ev;
-            let pixel = Graphics.getPixelF(textureImageData, tex_u, tex_v)
-            Graphics.setPixel(imageData, j, i, pixel.r, pixel.g, pixel.b, pixel.a);
-            t += tstep;
+          // Draw the horizontal line between left and right
+          const dx = (right.x-left.x)
+          if (dx!=0) {
+            const ustep = (right.u-left.u) / dx
+            const vstep = (right.v-left.v) / dx
+            for (let x=left.x; x<right.x; x++) {
+              const xsteps = x-left.x
+              const u = left.u + xsteps * ustep
+              const v = left.v + xsteps * vstep
+              const pixel = Graphics.getPixelF(textureImageData, u, v)
+              Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
+            }
           }
         }
       }
