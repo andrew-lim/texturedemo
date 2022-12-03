@@ -542,10 +542,9 @@ class TextureDemo
 
       for( let triangle of clippedTriangles) {
         // Perspective Division to get NDC
-        let divide = true
-        let ndc1 = this.clipToNDC(triangle.getPoint(0).getPos().getArray(), divide)
-        let ndc2 = this.clipToNDC(triangle.getPoint(1).getPos().getArray(), divide)
-        let ndc3 = this.clipToNDC(triangle.getPoint(2).getPos().getArray(), divide)
+        let ndc1 = this.clipToNDC(triangle.getPoint(0).getPos().getArray())
+        let ndc2 = this.clipToNDC(triangle.getPoint(1).getPos().getArray())
+        let ndc3 = this.clipToNDC(triangle.getPoint(2).getPos().getArray())
 
         // Backface Culling Check
         let backfaceCullingOn = document.getElementById("cb_backfaceCulling").checked
@@ -571,17 +570,16 @@ class TextureDemo
 
         else if (document.getElementById("radioDrawModeAffine").checked) {
           Graphics.affineTexturedTriangle(this.screenImageData,
-                                win1[0], win1[1], triangle.getTexU(0), triangle.getTexV(0),
-                                win2[0], win2[1], triangle.getTexU(1), triangle.getTexV(1),
-                                win3[0], win3[1], triangle.getTexU(2), triangle.getTexV(2),
-                                textureImageData);
-
+                                          win1[0], win1[1], triangle.getTexU(0), triangle.getTexV(0),
+                                          win2[0], win2[1], triangle.getTexU(1), triangle.getTexV(1),
+                                          win3[0], win3[1], triangle.getTexU(2), triangle.getTexV(2),
+                                          textureImageData);
         }
         else {
           Graphics.texturedTriangle(this.screenImageData,
-                                    win1[0], win1[1], triangle.getTexU(0), triangle.getTexV(0), triangle.getPoint(0).getW(),
-                                    win2[0], win2[1], triangle.getTexU(1), triangle.getTexV(1), triangle.getPoint(1).getW(),
-                                    win3[0], win3[1], triangle.getTexU(2), triangle.getTexV(2), triangle.getPoint(2).getW(),
+                                    win1[0], win1[1], triangle.getTexU(0), triangle.getTexV(0), triangle.getPointW(0),
+                                    win2[0], win2[1], triangle.getTexU(1), triangle.getTexV(1), triangle.getPointW(1),
+                                    win3[0], win3[1], triangle.getTexU(2), triangle.getTexV(2), triangle.getPointW(2),
                                     textureImageData);
         }
 
