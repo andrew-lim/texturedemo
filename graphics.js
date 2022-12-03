@@ -213,7 +213,7 @@ class Graphics
       }
 
       // The middle point on the top-bottom line
-      let mid2 = { x: Math.trunc(top.x+dytopmid*topbotstep.x),
+      let mid2 = { x: top.x+dytopmid*topbotstep.x,
                    y: top.y+dytopmid,
                    u: top.u+dytopmid*topbotstep.u,
                    v: top.v+dytopmid*topbotstep.v }
