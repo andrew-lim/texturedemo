@@ -310,6 +310,192 @@ class Graphics
 
     /**
      * Draws a perspective correct textured triangle
+     * Adapted from:
+     * https://github.com/OneLoneCoder/Javidx9/blob/master/PixelGameEngine/SmallerProjects/OneLoneCoder_PGE_olcEngine3D.cpp
+     * Main difference now is calculating the middle point of the top-bottom
+     * side before drawing. This new middle point (mid2) is compared with the
+     * middle vertex (mid) of the triangle and swapped if needed to ensure
+     * drawing each horizontal scanline is from left to right.
+     *
+     * imageData is the ImageData to draw on
+     * The x, y parameters are the triangle screen vertices
+     * The u, v parameters are the respective texture coordinates
+     * The w parameters can be either the z or w values in clip space
+     * (before perspective division)
+     * textureImageData the ImageData holding the texture pixels
+     */
+    static texturedTriangle(imageData,
+                            x1, y1, u1, v1, w1,
+                            x2, y2, u2, v2, w2,
+                            x3, y3, u3, v3, w3,
+                            textureImageData)
+    {
+      x1 = Math.trunc( x1 )
+      y1 = Math.trunc( y1 )
+      x2 = Math.trunc( x2 )
+      y2 = Math.trunc( y2 )
+      x3 = Math.trunc( x3 )
+      y3 = Math.trunc( y3 )
+
+      // Texture mapping perspective correction using w
+      u1 = u1 / w1
+      u2 = u2 / w2
+      u3 = u3 / w3
+      v1 = v1 / w1
+      v2 = v2 / w2
+      v3 = v3 / w3
+      w1 = 1.0 / w1
+      w2 = 1.0 / w2
+      w3 = 1.0 / w3
+
+      let tmp = 0;
+
+      let top = {x:x1, y:y1, u:u1, v:v1, w:w1}
+      let mid = {x:x2, y:y2, u:u2, v:v2, w:w2}
+      let bot = {x:x3, y:y3, u:u3, v:v3, w:w3}
+
+      // Sort the points vertically
+      if (mid.y < top.y) {
+        tmp=mid; mid=top; top=tmp;
+      }
+      if (bot.y < top.y) {
+        tmp=bot; bot=top; top=tmp;
+      }
+      if (bot.y < mid.y) {
+        tmp=bot; bot=mid; mid=tmp;
+      }
+
+      const dytopmid = mid.y - top.y  // Top to Mid
+      const dytopbot = bot.y - top.y  // Top to Bottom
+      const dymidbot = bot.y - mid.y  // Mid to Bottom
+
+      // Check if triangle has 0 height
+      if (dytopbot == 0) {
+        return
+      }
+
+      // Top to Bottom Steps
+      const topbotstep = {
+        x:(bot.x - top.x) / Math.abs(dytopbot),
+        u:(bot.u - top.u) / Math.abs(dytopbot),
+        v:(bot.v - top.v) / Math.abs(dytopbot),
+        w:(bot.w - top.w) / Math.abs(dytopbot)
+      }
+
+      // The middle point on the top-bottom line
+      let mid2 = { x: top.x+dytopmid*topbotstep.x,
+                   y: top.y+dytopmid,
+                   u: top.u+dytopmid*topbotstep.u,
+                   v: top.v+dytopmid*topbotstep.v,
+                   w: top.w+dytopmid*topbotstep.w }
+
+      // Make sure mid is left of mid2 because we will
+      // draw the horizontal scan line from left-to-right
+      if (mid.x > mid2.x) {
+        tmp=mid; mid=mid2; mid2=tmp;
+      }
+
+      // Top Half Triangle
+      if (dytopmid) {
+        const leftStep = {
+          x:(mid.x - top.x) / Math.abs(dytopmid),
+          u:(mid.u - top.u) / Math.abs(dytopmid),
+          v:(mid.v - top.v) / Math.abs(dytopmid),
+          w:(mid.w - top.w) / Math.abs(dytopmid)
+        }
+        const rightStep = {
+          x:(mid2.x - top.x) / Math.abs(dytopmid),
+          u:(mid2.u - top.u) / Math.abs(dytopmid),
+          v:(mid2.v - top.v) / Math.abs(dytopmid),
+          w:(mid2.w - top.w) / Math.abs(dytopmid)
+        }
+
+        for (let y=top.y; y<=mid.y; y++) {
+          const ysteps = y-top.y
+
+          // Left Point
+          const left = { x: Math.trunc(top.x+ysteps*leftStep.x),
+                         u: top.u+ysteps*leftStep.u,
+                         v: top.v+ysteps*leftStep.v,
+                         w: top.w+ysteps*leftStep.w }
+
+          // Right Point
+          const right = { x: Math.trunc(top.x+ysteps*rightStep.x ),
+                          u: top.u+ysteps*rightStep.u,
+                          v: top.v+ysteps*rightStep.v,
+                          w: top.w+ysteps*rightStep.w }
+
+          // Draw the horizontal line between left and right
+          const dx = right.x-left.x
+          if (dx!=0) {
+            const ustep = (right.u-left.u) / dx
+            const vstep = (right.v-left.v) / dx
+            const wstep = (right.w-left.w) / dx
+            for (let x=left.x; x<right.x; x++) {
+              const xsteps = x-left.x
+              const u = left.u + xsteps * ustep
+              const v = left.v + xsteps * vstep
+              const w = left.w + xsteps * wstep
+              const pixel = Graphics.getPixelF(textureImageData, u/w, v/w)
+              Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
+            }
+          }
+        }
+      }
+
+      // Bottom Half Triangle
+      if (dymidbot) {
+        const leftStep = {
+          x:(bot.x - mid.x) / Math.abs(dymidbot),
+          u:(bot.u - mid.u) / Math.abs(dymidbot),
+          v:(bot.v - mid.v) / Math.abs(dymidbot),
+          w:(bot.w - mid.w) / Math.abs(dymidbot)
+        }
+        const rightStep = {
+          x:(bot.x - mid2.x) / Math.abs(dymidbot),
+          u:(bot.u - mid2.u) / Math.abs(dymidbot),
+          v:(bot.v - mid2.v) / Math.abs(dymidbot),
+          w:(bot.w - mid2.w) / Math.abs(dymidbot)
+        }
+        for (let y=Math.trunc(mid.y); y<=bot.y; y++) {
+          const ysteps  = y - mid.y
+
+          // Left Point
+          const left = { x: Math.trunc(mid.x+ysteps*leftStep.x),
+                         u: mid.u+ysteps*leftStep.u,
+                         v: mid.v+ysteps*leftStep.v,
+                         w: mid.w+ysteps*leftStep.w }
+
+          // Right Point
+          const right = { x: Math.trunc(mid2.x+ysteps*rightStep.x ),
+                          u: mid2.u+ysteps*rightStep.u,
+                          v: mid2.v+ysteps*rightStep.v,
+                          w: mid2.w+ysteps*rightStep.w }
+
+          // Draw the horizontal line between left and right
+          const dx = (right.x-left.x)
+          if (dx!=0) {
+            const ustep = (right.u-left.u) / dx
+            const vstep = (right.v-left.v) / dx
+            const wstep = (right.w-left.w) / dx
+            for (let x=left.x; x<right.x; x++) {
+              const xsteps = x-left.x
+              const u = left.u + xsteps * ustep
+              const v = left.v + xsteps * vstep
+              const w = left.w + xsteps * wstep
+              const pixel = Graphics.getPixelF(textureImageData, u/w, v/w)
+              Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
+            }
+          }
+        }
+      }
+    }
+
+    /**
+     * OLDER VERSION
+     * Keeping it here for posterity and for testing
+     *
+     * Draws a perspective correct textured triangle
      * See https://github.com/OneLoneCoder/Javidx9/blob/master/PixelGameEngine/SmallerProjects/OneLoneCoder_PGE_olcEngine3D.cpp
      *
      * imageData is the ImageData to draw on
@@ -319,11 +505,12 @@ class Graphics
      * but before perspective division into normalized device coordinates
      * textureImageData the ImageData holding the texture pixels
      */
-    static texturedTriangle(imageData,
-                            x1, y1, u1, v1, w1,
-                            x2, y2, u2, v2, w2,
-                            x3, y3, u3, v3, w3,
-                            textureImageData)
+    /*
+    static texturedTriangleOld(imageData,
+                               x1, y1, u1, v1, w1,
+                               x2, y2, u2, v2, w2,
+                               x3, y3, u3, v3, w3,
+                               textureImageData)
     {
       // Only want the integer parts of the triangle vertices
       x1 = Math.trunc( x1 )
@@ -491,5 +678,6 @@ class Graphics
         }
       }
     }
+    */
 
 }
