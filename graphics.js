@@ -96,64 +96,81 @@ class Graphics
 
       let tmp = 0;
 
-      if (y2 < y1) {
-        tmp = y1; y1 = y2; y2 = tmp;
-        tmp = x1; x1 = x2; x2 = tmp;
+      let top = {x:x1, y:y1}
+      let mid = {x:x2, y:y2}
+      let bot = {x:x3, y:y3}
+
+      // Sort the points vertically
+      if (mid.y < top.y) {
+        tmp=mid; mid=top; top=tmp;
+      }
+      if (bot.y < top.y) {
+        tmp=bot; bot=top; top=tmp;
+      }
+      if (bot.y < mid.y) {
+        tmp=bot; bot=mid; mid=tmp;
       }
 
-      if (y3 < y1) {
-        tmp = y1; y1 = y3; y3 = tmp;
-        tmp = x1; x1 = x3; x3 = tmp;
+      const dytopmid = mid.y - top.y  // Top to Mid
+      const dytopbot = bot.y - top.y  // Top to Bottom
+      const dymidbot = bot.y - mid.y  // Mid to Bottom
+
+      // Check if triangle has 0 height
+      if (dytopbot == 0) {
+        return
       }
 
-      if (y3 < y2) {
-        tmp = y2; y2 = y3; y3 = tmp;
-        tmp = x2; x2 = x3; x3 = tmp;
+      // Top to Bottom Steps
+      const topbotstep = {
+        x:(bot.x - top.x) / Math.abs(dytopbot)
       }
 
-      let dy1 = y2 - y1
-      let dx1 = x2 - x1
+      // The middle point on the top-bottom line
+      let mid2 = { x: top.x+dytopmid*topbotstep.x,
+                   y: top.y+dytopmid }
 
-      let dy2 = y3 - y1
-      let dx2 = x3 - x1
+      // Make sure mid is left of mid2 because we will
+      // draw the horizontal scan line from left-to-right
+      if (mid.x > mid2.x) {
+        tmp=mid; mid=mid2; mid2=tmp;
+      }
 
-      let dax_step = 0, dbx_step = 0;
+      // Top Half Triangle
+      if (dytopmid) {
+        const leftStep = { x:(mid.x - top.x) / Math.abs(dytopmid) }
+        const rightStep = { x:(mid2.x - top.x) / Math.abs(dytopmid) }
+        for (let y=top.y; y<=mid.y; y++) {
+          const ysteps = y-top.y
 
-      if (dy1) dax_step = dx1 / Math.abs(dy1);
-      if (dy2) dbx_step = dx2 / Math.abs(dy2);
+          // Left Point
+          const left = { x: Math.trunc(top.x+ysteps*leftStep.x) }
 
-      if (dy1) {
-        for (let i = Math.trunc(y1); i <= y2; i++) {
-          let ax = Math.trunc( x1 + (i - y1) * dax_step )
-          let bx = Math.trunc( x1 + (i - y1) * dbx_step )
+          // Right Point
+          const right = { x: Math.trunc(top.x+ysteps*rightStep.x ) }
 
-          if (ax > bx) {
-            tmp = ax; ax = bx; bx = tmp;
-          }
-
-          for (let j = ax; j < bx; j++) {
-            Graphics.setPixel(imageData, j, i, rgba[0], rgba[1], rgba[2], rgba[3]);
+          // Draw the horizontal line between left and right
+          for (let x=left.x; x<right.x; x++) {
+            Graphics.setPixel(imageData, x, y, rgba[0], rgba[1], rgba[2], rgba[3])
           }
         }
       }
 
-      dy1 = y3 - y2;
-      dx1 = x3 - x2;
+      // Bottom Half Triangle
+      if (dymidbot) {
+        const leftStep = {x:(bot.x - mid.x) / Math.abs(dymidbot)}
+        const rightStep = {x:(bot.x - mid2.x) / Math.abs(dymidbot)}
+        for (let y=mid.y; y<=bot.y; y++) {
+          const ysteps  = y - mid.y
 
-      if (dy1) dax_step = dx1 / Math.abs(dy1);
-      if (dy2) dbx_step = dx2 / Math.abs(dy2);
+          // Left Point
+          const left = { x: Math.trunc(mid.x+ysteps*leftStep.x) }
 
-      if (dy1) {
-        for (let i = Math.trunc(y2); i <= y3; i++) {
-          let ax = Math.trunc( x2 + (i - y2) * dax_step )
-          let bx = Math.trunc( x1 + (i - y1) * dbx_step )
+          // Right Point
+          const right = { x: Math.trunc(mid2.x+ysteps*rightStep.x ) }
 
-          if (ax > bx) {
-            tmp = ax; ax = bx; bx = tmp;
-          }
-
-          for (let j = ax; j < bx; j++) {
-            Graphics.setPixel(imageData, j, i, rgba[0], rgba[1], rgba[2], rgba[3]);
+          // Draw the horizontal line between left and right
+          for (let x=left.x; x<right.x; x++) {
+            Graphics.setPixel(imageData, x, y, rgba[0], rgba[1], rgba[2], rgba[3])
           }
         }
       }
