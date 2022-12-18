@@ -74,47 +74,29 @@ class Vertex
   }
 
   /*
-  Finds the lerp amount based off 2 homogeneous points, 1 outside the clipping plane,
-  and 1 inside the clipping plane.
+  Finds the interpolation amount based off 2 homogeneous points,
+  1 outside the clipping plane, and 1 inside the clipping plane.
 
-  Following Proof from TheBennyBox
-  https://youtu.be/VMD7fsCYO9o?t=571
-  https://github.com/BennyQBD/3DSoftwareRenderer/blob/master/src/RenderContext.java#L84
+  Uses the formula for distance between a point and line segment.
 
-  To find the lerp amount L
+    d1/(d1-d2)
 
-    1 = source + (destination - source) * L
+  Let N be inside normal of clipping plane, then
+    d1 is the signed distance between outside point and N
+    d2 is the signed distance between inside point and N
 
-    1 = S + (D - S) * L
-      = S + DL - SL
-      = DL + S(1 - L)
-      = S(1-L) + DL
-      = S-SL + DL + (L-L)
+  Full explanation for this formula here:
+  https://fabiensanglard.net/polygon_codec/clippingdocument/Clipping.pdf
 
-    1 - S = L-SL-L+DL
-          = L(1-S)-L(1-D)
-          = L((1-S)-(1-D))
-
-  Lerp factor
-
-      L = 1-S/((1-S)-(1-D))
-
-  Replace 1 with W components
-
-      L = Sw-S / ((Sw-S)-(Dw-D))
-
-  @param src  Source vector (the outside point)
-  @param dest Destination vector (the inside point)
+  @param pout outside point
+  @param pin  inside point
   @param ixyz Axis part - 0, 1, or 3
   @param planeSign Either 1 or -1
-
   */
-  static findLerpFactor(src, dest, ixyz, xyzSign)
+  static findLerpFactor(pout, pin, ixyz, xyzSign)
   {
-    let S  = src.get(ixyz) * xyzSign
-    let D  = dest.get(ixyz) * xyzSign
-    let Sw = src.getW()
-    let Dw = dest.getW()
-    return (Sw-S)/((Sw-S)-(Dw-D))
+    const d1 = pout.get(ixyz) * xyzSign - pout.getW()
+    const d2 = pin.get(ixyz) * xyzSign - pin.getW()
+    return d1/(d1-d2)
   }
 }
