@@ -21,6 +21,7 @@ const KEY_A     = 65
 const KEY_D     = 68
 const KEY_E     = 69
 const KEY_Q     = 81
+const KEY_N     = 78
 
 class TextureDemo
 {
@@ -324,12 +325,12 @@ class TextureDemo
    */
   clipTrianglesByAllPlanes(triangles)
   {
-    triangles = this.clipTrianglesByPlane(triangles, 0, 1)  //  x
-    triangles = this.clipTrianglesByPlane(triangles, 0, -1) // -x
-    triangles = this.clipTrianglesByPlane(triangles, 1, 1)  //  y
-    triangles = this.clipTrianglesByPlane(triangles, 1, -1) // -y
-    triangles = this.clipTrianglesByPlane(triangles, 2, 1)  //  z
-    triangles = this.clipTrianglesByPlane(triangles, 2, -1) // -z
+    triangles = this.clipTrianglesByPlane(triangles, 2, -1) // near
+    triangles = this.clipTrianglesByPlane(triangles, 2, 1)  // far
+    triangles = this.clipTrianglesByPlane(triangles, 0, 1)  // right
+    triangles = this.clipTrianglesByPlane(triangles, 0, -1) // left
+    triangles = this.clipTrianglesByPlane(triangles, 1, 1)  // top
+    triangles = this.clipTrianglesByPlane(triangles, 1, -1) // bottom
     return triangles
   }
 
