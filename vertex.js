@@ -76,27 +76,28 @@ class Vertex
   /*
   Finds the interpolation amount based off 2 homogeneous points,
   1 outside the clipping plane, and 1 inside the clipping plane.
+  The clipping plane is based on their w components
 
   Uses the formula for distance between a point and line segment.
 
     d1/(d1-d2)
 
   Let N be inside normal of clipping plane, then
-    d1 is the signed distance between outside point and N
-    d2 is the signed distance between inside point and N
+    d1 is the signed distance between source point and N
+    d2 is the signed distance between destination point and N
 
   Full explanation for this formula here:
   https://fabiensanglard.net/polygon_codec/clippingdocument/Clipping.pdf
 
-  @param pout outside point
-  @param pin  inside point
+  @param src source point to lerp from
+  @param dst destination point
   @param ixyz Axis part - 0, 1, or 3
   @param planeSign Either 1 or -1
   */
-  static findLerpFactor(pout, pin, ixyz, xyzSign)
+  static findLerpFactor(src, dst, ixyz, xyzSign)
   {
-    const d1 = pout.get(ixyz) * xyzSign - pout.getW()
-    const d2 = pin.get(ixyz) * xyzSign - pin.getW()
+    const d1 = src.getW() - src.get(ixyz)*xyzSign
+    const d2 = dst.getW() - dst.get(ixyz)*xyzSign
     return d1/(d1-d2)
   }
 }
