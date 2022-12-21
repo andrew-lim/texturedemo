@@ -96,8 +96,9 @@ class Vertex
   */
   static findLerpFactor(src, dst, ixyz, xyzSign)
   {
-    const d1 = src.getW() - src.get(ixyz)*xyzSign
-    const d2 = dst.getW() - dst.get(ixyz)*xyzSign
+    // const N = -xyzSign
+    const d1 = (src.get(ixyz)*xyzSign - src.getW()) // * N
+    const d2 = (dst.get(ixyz)*xyzSign - dst.getW()) // * N
     return d1/(d1-d2)
   }
 }
