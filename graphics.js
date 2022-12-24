@@ -345,7 +345,8 @@ class Graphics
                             x1, y1, u1, v1, w1,
                             x2, y2, u2, v2, w2,
                             x3, y3, u3, v3, w3,
-                            textureImageData)
+                            textureImageData,
+                            zbuffer = null)
     {
       x1 = Math.trunc( x1 )
       y1 = Math.trunc( y1 )
@@ -453,7 +454,17 @@ class Graphics
               const u = left.u + xsteps * ustep
               const v = left.v + xsteps * vstep
               const w = left.w + xsteps * wstep
-              const pixel = Graphics.getPixelF(textureImageData, u/w, v/w)
+              const z = 1/w
+              const pixel = Graphics.getPixelF(textureImageData, u*z, v*z)
+              if (zbuffer) {
+                const oldz = zbuffer.safeGet(x, y)
+                if (oldz==0 || z<zbuffer.safeGet(x, y)) {
+                  zbuffer.safeSet(x, y, z)
+                }
+                else {
+                  continue
+                }
+              }
               Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
             }
           }
@@ -500,7 +511,17 @@ class Graphics
               const u = left.u + xsteps * ustep
               const v = left.v + xsteps * vstep
               const w = left.w + xsteps * wstep
-              const pixel = Graphics.getPixelF(textureImageData, u/w, v/w)
+              const z = 1/w
+              const pixel = Graphics.getPixelF(textureImageData, u*z, v*z)
+              if (zbuffer) {
+                const oldz = zbuffer.safeGet(x, y)
+                if (oldz==0 || z<zbuffer.safeGet(x, y)) {
+                  zbuffer.safeSet(x, y, z)
+                }
+                else {
+                  continue
+                }
+              }
               Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
             }
           }

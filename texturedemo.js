@@ -52,9 +52,10 @@ class TextureDemo
     this.texturesLoadedCount = 0
     this.texturesLoaded = false
     this.keys = []
+    this.zbuffer = new ZBuffer(displayWidth, displayHeight)
   }
 
- loadImages() {
+  loadImages() {
     // Draw images on this temporary canvas to grab the ImageData pixels
     let canvas = document.createElement('canvas');
     canvas.width = this.textureSize;
@@ -503,6 +504,8 @@ class TextureDemo
     // Clear the screen data
     this.screenImageData.data.set(this.blankImageData.data)
 
+    this.zbuffer.clear()
+
     for (let i=0; i<this.mesh.triangles.length; ++i) {
       let t = this.mesh.triangles[i]
 
@@ -561,6 +564,7 @@ class TextureDemo
         let win3 = this.ndcToWindow(ndc3, viewWidth, viewHeight)
 
         let textureImageData = this.textureImageDatas[this.textureIndex]
+        const zbufferOn = document.getElementById("cb_zbuffer").checked
 
         if (document.getElementById("radioDrawModeSolid").checked) {
           Graphics.fillTriangle(this.screenImageData,
@@ -581,7 +585,8 @@ class TextureDemo
                                     win1[0], win1[1], triangle.getTexU(0), triangle.getTexV(0), triangle.getPointW(0),
                                     win2[0], win2[1], triangle.getTexU(1), triangle.getTexV(1), triangle.getPointW(1),
                                     win3[0], win3[1], triangle.getTexU(2), triangle.getTexV(2), triangle.getPointW(2),
-                                    textureImageData);
+                                    textureImageData,
+                                    zbufferOn?this.zbuffer:null);
         }
 
         if (document.getElementById("cb_wireframe").checked) {
