@@ -365,71 +365,18 @@ class TextureDemo
     let insideIndices = []
     let outsideIndices = []
 
-    const xyz1 = triangle.getPoint(0).get(ixyz)
-    const xyz2 = triangle.getPoint(1).get(ixyz)
-    const xyz3 = triangle.getPoint(2).get(ixyz)
-
-    const w1 = triangle.getPointW(0)
-    const w2 = triangle.getPointW(1)
-    const w3 = triangle.getPointW(2)
-
-    const point1 = triangle.getPoint(0)
-    const point2 = triangle.getPoint(1)
-    const point3 = triangle.getPoint(2)
-
-    // -w <= x,y,z
-    if (planeSign < 0) {
-      if (xyz1 < -w1) {
-        outsidePoints.push(point1)
-        outsideIndices.push(0)
+    for (let i=0; i<3; ++i) {
+      let pt = triangle.getPoint(i)
+      let xyz = pt.get(ixyz)
+      let w = pt.getW()
+      let outside = (planeSign<0 && xyz<-w) || (planeSign>0 && xyz>w)
+      if (outside) {
+        outsidePoints.push(pt)
+        outsideIndices.push(i)
       }
       else {
-        insidePoints.push(point1)
-        insideIndices.push(0)
-      }
-      if (xyz2 < -w2) {
-        outsidePoints.push(point2)
-        outsideIndices.push(1)
-      }
-      else {
-        insidePoints.push(point2)
-        insideIndices.push(1)
-      }
-      if (xyz3 < -w3) {
-        outsidePoints.push(point3)
-        outsideIndices.push(2)
-      }
-      else {
-        insidePoints.push(point3)
-        insideIndices.push(2)
-      }
-    }
-
-    // x,y,z >= w
-    else if (planeSign > 0) {
-      if (xyz1 > w1) {
-        outsidePoints.push(point1)
-        outsideIndices.push(0)
-      }
-      else {
-        insidePoints.push(point1)
-        insideIndices.push(0)
-      }
-      if (xyz2 > w2) {
-        outsidePoints.push(point2)
-        outsideIndices.push(1)
-      }
-      else {
-        insidePoints.push(point2)
-        insideIndices.push(1)
-      }
-      if (xyz3 > w3) {
-        outsidePoints.push(point3)
-        outsideIndices.push(2)
-      }
-      else {
-        insidePoints.push(point3)
-        insideIndices.push(2)
+        insidePoints.push(pt)
+        insideIndices.push(i)
       }
     }
 
