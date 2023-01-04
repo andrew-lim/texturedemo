@@ -366,10 +366,10 @@ class TextureDemo
     let outsideIndices = []
 
     for (let i=0; i<3; ++i) {
-      let pt = triangle.getPoint(i)
-      let xyz = pt.get(ixyz)
-      let w = pt.getW()
-      let outside = (planeSign<0 && xyz<-w) || (planeSign>0 && xyz>w)
+      const pt = triangle.getPoint(i)
+      const xyz = pt.get(ixyz)
+      const w = pt.getW()
+      const outside = (planeSign<0 && xyz<-w) || (planeSign>0 && xyz>w)
       if (outside) {
         outsidePoints.push(pt)
         outsideIndices.push(i)
