@@ -4,7 +4,7 @@
  *   vertex.js
  *   vector4f.js
  *   graphics.js
- *   trianglemesh.js
+ *   triangle.js
  *   base64texture.js
  *   gl-matrix-min (https://glmatrix.net/)
  *
