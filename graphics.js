@@ -457,9 +457,9 @@ class Graphics
               const z = 1/w
               const pixel = Graphics.getPixelF(textureImageData, u*z, v*z)
               if (zbuffer) {
-                const oldz = zbuffer.safeGet(x, y)
-                if (oldz==0 || z<zbuffer.safeGet(x, y)) {
-                  zbuffer.safeSet(x, y, z)
+                const oldz = zbuffer.get(x, y)
+                if (oldz==0 || z<oldz) {
+                  zbuffer.set(x, y, z)
                 }
                 else {
                   continue
@@ -514,9 +514,9 @@ class Graphics
               const z = 1/w
               const pixel = Graphics.getPixelF(textureImageData, u*z, v*z)
               if (zbuffer) {
-                const oldz = zbuffer.safeGet(x, y)
-                if (oldz==0 || z<zbuffer.safeGet(x, y)) {
-                  zbuffer.safeSet(x, y, z)
+                const oldz = zbuffer.get(x, y)
+                if (oldz==0 || z<oldz) {
+                  zbuffer.set(x, y, z)
                 }
                 else {
                   continue
