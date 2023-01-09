@@ -72,33 +72,4 @@ class Vertex
     let newTex = this.texcoords.lerp(other.texcoords, lerpFactor)
     return new Vertex(newPos, newTex)
   }
-
-  /*
-  Finds the interpolation amount based off 2 homogeneous points,
-  1 outside the clipping plane, and 1 inside the clipping plane.
-  The clipping plane is based on their w components
-
-  Uses the formula for distance between a point and line segment.
-
-    d1/(d1-d2)
-
-  Let N be inside normal of clipping plane, then
-    d1 is the signed distance between source point and N
-    d2 is the signed distance between destination point and N
-
-  Full explanation for this formula here:
-  https://fabiensanglard.net/polygon_codec/clippingdocument/Clipping.pdf
-
-  @param src source point to lerp from
-  @param dst destination point
-  @param ixyz Axis part - 0, 1, or 3
-  @param planeSign Either 1 or -1
-  */
-  static findLerpFactor(src, dst, ixyz, xyzSign)
-  {
-    // const N = -xyzSign
-    const d1 = (src.get(ixyz) - src.getW()*xyzSign) // * N
-    const d2 = (dst.get(ixyz) - dst.getW()*xyzSign) // * N
-    return d1/(d1-d2)
-  }
 }
