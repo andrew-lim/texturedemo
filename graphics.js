@@ -30,6 +30,23 @@ class Graphics
       };
     }
 
+    static safeSetPixel(imageData, x, y, r, g, b, a)
+    {
+      if (x<0) {
+        throw "x="+x+" < 0"
+      }
+      if (y<0) {
+        throw "y="+y+" < 0"
+      }
+      if (x>=imageData.width) {
+        throw "x="+x+" >= imageData.width="+imageData.width
+      }
+      if (y>=imageData.height) {
+        throw "y="+y+" >= imageData.height="+imageData.height
+      }
+      Graphics.setPixel(imageData, x, y, r, g, b, a)
+    }
+
     /**
      * Like setPixel but does checking and truncating of passed in values to make sure
      * they are integers
@@ -60,7 +77,9 @@ class Graphics
       let err = dx - dy;
 
       while(true) {
-        Graphics.setPixel(imageData, x0, y0, rgba[0], rgba[1], rgba[2], rgba[3]);
+        if (x0>=0 && y0>=0 && x0<imageData.width && y0<imageData.height) {
+          Graphics.setPixel(imageData, x0, y0, rgba[0], rgba[1], rgba[2], rgba[3]);
+        }
 
         if ((x0 === x1) && (y0 === y1)) break;
         let e2 = 2*err;
@@ -139,7 +158,9 @@ class Graphics
       if (dytopmid) {
         const leftStep = { x:(mid.x - top.x) / Math.abs(dytopmid) }
         const rightStep = { x:(mid2.x - top.x) / Math.abs(dytopmid) }
-        for (let y=top.y; y<=mid.y; y++) {
+        const ystart = Math.max(0, top.y)
+        const yend = Math.min(imageData.height-1, mid.y)
+        for (let y=ystart; y<=yend; y++) {
           const ysteps = y-top.y
 
           // Left Point
@@ -149,7 +170,9 @@ class Graphics
           const right = { x: Math.trunc(top.x+ysteps*rightStep.x ) }
 
           // Draw the horizontal line between left and right
-          for (let x=left.x; x<right.x; x++) {
+          const xstart = Math.max(0, left.x)
+          const xend = Math.min(right.x, imageData.width)
+          for (let x=xstart; x<xend; x++) {
             Graphics.setPixel(imageData, x, y, rgba[0], rgba[1], rgba[2], rgba[3])
           }
         }
@@ -159,7 +182,9 @@ class Graphics
       if (dymidbot) {
         const leftStep = {x:(bot.x - mid.x) / Math.abs(dymidbot)}
         const rightStep = {x:(bot.x - mid2.x) / Math.abs(dymidbot)}
-        for (let y=mid.y; y<=bot.y; y++) {
+        const ystart = Math.max(0, mid.y)
+        const yend = Math.min(imageData.height-1, bot.y)
+        for (let y=ystart; y<=yend; y++) {
           const ysteps  = y - mid.y
 
           // Left Point
@@ -169,7 +194,9 @@ class Graphics
           const right = { x: Math.trunc(mid2.x+ysteps*rightStep.x ) }
 
           // Draw the horizontal line between left and right
-          for (let x=left.x; x<right.x; x++) {
+          const xstart = Math.max(0, left.x)
+          const xend = Math.min(right.x, imageData.width)
+          for (let x=xstart; x<xend; x++) {
             Graphics.setPixel(imageData, x, y, rgba[0], rgba[1], rgba[2], rgba[3])
           }
         }
@@ -254,7 +281,9 @@ class Graphics
           v:(mid2.v - top.v) / Math.abs(dytopmid)
         }
 
-        for (let y=top.y; y<=mid.y; y++) {
+        const ystart = Math.max(0, top.y)
+        const yend = Math.min(imageData.height-1, mid.y)
+        for (let y=ystart; y<=yend; y++) {
           const ysteps = y-top.y
 
           // Left Point
@@ -272,7 +301,9 @@ class Graphics
           if (dx!=0) {
             const ustep = (right.u-left.u) / dx
             const vstep = (right.v-left.v) / dx
-            for (let x=left.x; x<right.x; x++) {
+            const xstart = Math.max(0, left.x)
+            const xend = Math.min(right.x, imageData.width)
+            for (let x=xstart; x<xend; x++) {
               const xsteps = x-left.x
               const u = left.u + xsteps * ustep
               const v = left.v + xsteps * vstep
@@ -295,7 +326,9 @@ class Graphics
           u:(bot.u - mid2.u) / Math.abs(dymidbot),
           v:(bot.v - mid2.v) / Math.abs(dymidbot)
         }
-        for (let y=mid.y; y<=bot.y; y++) {
+        const ystart = Math.max(0, mid.y)
+        const yend = Math.min(imageData.height-1, bot.y)
+        for (let y=ystart; y<=yend; y++) {
           const ysteps  = y - mid.y
 
           // Left Point
@@ -313,7 +346,9 @@ class Graphics
           if (dx!=0) {
             const ustep = (right.u-left.u) / dx
             const vstep = (right.v-left.v) / dx
-            for (let x=left.x; x<right.x; x++) {
+            const xstart = Math.max(0, left.x)
+            const xend = Math.min(right.x, imageData.width)
+            for (let x=xstart; x<xend; x++) {
               const xsteps = x-left.x
               const u = left.u + xsteps * ustep
               const v = left.v + xsteps * vstep
@@ -427,8 +462,9 @@ class Graphics
           v:(mid2.v - top.v) / Math.abs(dytopmid),
           w:(mid2.w - top.w) / Math.abs(dytopmid)
         }
-
-        for (let y=top.y; y<=mid.y; y++) {
+        const ystart = Math.max(0, top.y)
+        const yend = Math.min(imageData.height-1, mid.y)
+        for (let y=ystart; y<=yend; y++) {
           const ysteps = y-top.y
 
           // Left Point
@@ -449,7 +485,9 @@ class Graphics
             const ustep = (right.u-left.u) / dx
             const vstep = (right.v-left.v) / dx
             const wstep = (right.w-left.w) / dx
-            for (let x=left.x; x<right.x; x++) {
+            const xstart = Math.max(0, left.x)
+            const xend = Math.min(right.x, imageData.width)
+            for (let x=xstart; x<xend; x++) {
               const xsteps = x-left.x
               const u = left.u + xsteps * ustep
               const v = left.v + xsteps * vstep
@@ -485,8 +523,10 @@ class Graphics
           v:(bot.v - mid2.v) / Math.abs(dymidbot),
           w:(bot.w - mid2.w) / Math.abs(dymidbot)
         }
-        for (let y=mid.y; y<=bot.y; y++) {
-          const ysteps  = y - mid.y
+        const ystart = Math.max(0, mid.y)
+        const yend = Math.min(imageData.height-1, bot.y)
+        for (let y=ystart; y<=yend; y++) {
+          const ysteps = y-mid.y
 
           // Left Point
           const left = { x: Math.trunc(mid.x+ysteps*leftStep.x),
@@ -506,7 +546,9 @@ class Graphics
             const ustep = (right.u-left.u) / dx
             const vstep = (right.v-left.v) / dx
             const wstep = (right.w-left.w) / dx
-            for (let x=left.x; x<right.x; x++) {
+            const xstart = Math.max(0, left.x)
+            const xend = Math.min(right.x, imageData.width)
+            for (let x=xstart; x<xend; x++) {
               const xsteps = x-left.x
               const u = left.u + xsteps * ustep
               const v = left.v + xsteps * vstep

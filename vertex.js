@@ -68,8 +68,8 @@ class Vertex
 
   lerp(other, lerpFactor)
   {
-    let newPos = this.pos.lerp(other.pos, lerpFactor)
-    let newTex = this.texcoords.lerp(other.texcoords, lerpFactor)
+    const newPos = this.pos.lerp(other.pos, lerpFactor)
+    const newTex = this.texcoords.lerp(other.texcoords, lerpFactor)
     return new Vertex(newPos, newTex)
   }
 }
