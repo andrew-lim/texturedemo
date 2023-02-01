@@ -141,7 +141,7 @@ class Graphics
 
       // Top to Bottom Steps
       const topbotstep = {
-        x:(bot.x - top.x) / Math.abs(dytopbot)
+        x:(bot.x - top.x) / dytopbot
       }
 
       // The middle point on the top-bottom line
@@ -156,8 +156,8 @@ class Graphics
 
       // Top Half Triangle
       if (dytopmid) {
-        const leftStep = { x:(mid.x - top.x) / Math.abs(dytopmid) }
-        const rightStep = { x:(mid2.x - top.x) / Math.abs(dytopmid) }
+        const leftStep = { x:(mid.x - top.x) / dytopmid }
+        const rightStep = { x:(mid2.x - top.x) / dytopmid }
         const ystart = Math.max(0, top.y)
         const yend = Math.min(imageData.height-1, mid.y)
         for (let y=ystart; y<=yend; y++) {
@@ -180,8 +180,8 @@ class Graphics
 
       // Bottom Half Triangle
       if (dymidbot) {
-        const leftStep = {x:(bot.x - mid.x) / Math.abs(dymidbot)}
-        const rightStep = {x:(bot.x - mid2.x) / Math.abs(dymidbot)}
+        const leftStep = {x:(bot.x - mid.x) / dymidbot}
+        const rightStep = {x:(bot.x - mid2.x) / dymidbot}
         const ystart = Math.max(0, mid.y)
         const yend = Math.min(imageData.height-1, bot.y)
         for (let y=ystart; y<=yend; y++) {
@@ -251,9 +251,9 @@ class Graphics
 
       // Top to Bottom Steps
       const topbotstep = {
-        x:(bot.x - top.x) / Math.abs(dytopbot),
-        u:(bot.u - top.u) / Math.abs(dytopbot),
-        v:(bot.v - top.v) / Math.abs(dytopbot)
+        x:(bot.x - top.x) / dytopbot,
+        u:(bot.u - top.u) / dytopbot,
+        v:(bot.v - top.v) / dytopbot
       }
 
       // The middle point on the top-bottom line
@@ -271,14 +271,14 @@ class Graphics
       // Top Half Triangle
       if (dytopmid) {
         const leftStep = {
-          x:(mid.x - top.x) / Math.abs(dytopmid),
-          u:(mid.u - top.u) / Math.abs(dytopmid),
-          v:(mid.v - top.v) / Math.abs(dytopmid)
+          x:(mid.x - top.x) / dytopmid,
+          u:(mid.u - top.u) / dytopmid,
+          v:(mid.v - top.v) / dytopmid
         }
         const rightStep = {
-          x:(mid2.x - top.x) / Math.abs(dytopmid),
-          u:(mid2.u - top.u) / Math.abs(dytopmid),
-          v:(mid2.v - top.v) / Math.abs(dytopmid)
+          x:(mid2.x - top.x) / dytopmid,
+          u:(mid2.u - top.u) / dytopmid,
+          v:(mid2.v - top.v) / dytopmid
         }
 
         const ystart = Math.max(0, top.y)
@@ -317,14 +317,14 @@ class Graphics
       // Bottom Half Triangle
       if (dymidbot) {
         const leftStep = {
-          x:(bot.x - mid.x) / Math.abs(dymidbot),
-          u:(bot.u - mid.u) / Math.abs(dymidbot),
-          v:(bot.v - mid.v) / Math.abs(dymidbot)
+          x:(bot.x - mid.x) / dymidbot,
+          u:(bot.u - mid.u) / dymidbot,
+          v:(bot.v - mid.v) / dymidbot
         }
         const rightStep = {
-          x:(bot.x - mid2.x) / Math.abs(dymidbot),
-          u:(bot.u - mid2.u) / Math.abs(dymidbot),
-          v:(bot.v - mid2.v) / Math.abs(dymidbot)
+          x:(bot.x - mid2.x) / dymidbot,
+          u:(bot.u - mid2.u) / dymidbot,
+          v:(bot.v - mid2.v) / dymidbot
         }
         const ystart = Math.max(0, mid.y)
         const yend = Math.min(imageData.height-1, bot.y)
@@ -429,10 +429,10 @@ class Graphics
 
       // Top to Bottom Steps
       const topbotstep = {
-        x:(bot.x - top.x) / Math.abs(dytopbot),
-        u:(bot.u - top.u) / Math.abs(dytopbot),
-        v:(bot.v - top.v) / Math.abs(dytopbot),
-        w:(bot.w - top.w) / Math.abs(dytopbot)
+        x:(bot.x - top.x) / dytopbot,
+        u:(bot.u - top.u) / dytopbot,
+        v:(bot.v - top.v) / dytopbot,
+        w:(bot.w - top.w) / dytopbot
       }
 
       // The middle point on the top-bottom line
@@ -451,16 +451,16 @@ class Graphics
       // Top Half Triangle
       if (dytopmid) {
         const leftStep = {
-          x:(mid.x - top.x) / Math.abs(dytopmid),
-          u:(mid.u - top.u) / Math.abs(dytopmid),
-          v:(mid.v - top.v) / Math.abs(dytopmid),
-          w:(mid.w - top.w) / Math.abs(dytopmid)
+          x:(mid.x - top.x) / dytopmid,
+          u:(mid.u - top.u) / dytopmid,
+          v:(mid.v - top.v) / dytopmid,
+          w:(mid.w - top.w) / dytopmid
         }
         const rightStep = {
-          x:(mid2.x - top.x) / Math.abs(dytopmid),
-          u:(mid2.u - top.u) / Math.abs(dytopmid),
-          v:(mid2.v - top.v) / Math.abs(dytopmid),
-          w:(mid2.w - top.w) / Math.abs(dytopmid)
+          x:(mid2.x - top.x) / dytopmid,
+          u:(mid2.u - top.u) / dytopmid,
+          v:(mid2.v - top.v) / dytopmid,
+          w:(mid2.w - top.w) / dytopmid
         }
         const ystart = Math.max(0, top.y)
         const yend = Math.min(imageData.height-1, mid.y)
@@ -512,16 +512,16 @@ class Graphics
       // Bottom Half Triangle
       if (dymidbot) {
         const leftStep = {
-          x:(bot.x - mid.x) / Math.abs(dymidbot),
-          u:(bot.u - mid.u) / Math.abs(dymidbot),
-          v:(bot.v - mid.v) / Math.abs(dymidbot),
-          w:(bot.w - mid.w) / Math.abs(dymidbot)
+          x:(bot.x - mid.x) / dymidbot,
+          u:(bot.u - mid.u) / dymidbot,
+          v:(bot.v - mid.v) / dymidbot,
+          w:(bot.w - mid.w) / dymidbot
         }
         const rightStep = {
-          x:(bot.x - mid2.x) / Math.abs(dymidbot),
-          u:(bot.u - mid2.u) / Math.abs(dymidbot),
-          v:(bot.v - mid2.v) / Math.abs(dymidbot),
-          w:(bot.w - mid2.w) / Math.abs(dymidbot)
+          x:(bot.x - mid2.x) / dymidbot,
+          u:(bot.u - mid2.u) / dymidbot,
+          v:(bot.v - mid2.v) / dymidbot,
+          w:(bot.w - mid2.w) / dymidbot
         }
         const ystart = Math.max(0, mid.y)
         const yend = Math.min(imageData.height-1, bot.y)
