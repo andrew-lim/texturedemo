@@ -494,14 +494,11 @@ class Graphics
               const w = left.w + xsteps * wstep
               const z = 1/w
               const pixel = Graphics.getPixelF(textureImageData, u*z, v*z)
-              if (zbuffer) {
-                const oldz = zbuffer.get(x, y)
-                if (oldz==0 || z<oldz) {
-                  zbuffer.set(x, y, z)
-                }
-                else {
-                  continue
-                }
+              if (zbuffer && z<zbuffer.get(x, y)) {
+                zbuffer.set(x, y, z)
+              }
+              else {
+                continue
               }
               Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
             }
@@ -555,14 +552,11 @@ class Graphics
               const w = left.w + xsteps * wstep
               const z = 1/w
               const pixel = Graphics.getPixelF(textureImageData, u*z, v*z)
-              if (zbuffer) {
-                const oldz = zbuffer.get(x, y)
-                if (oldz==0 || z<oldz) {
-                  zbuffer.set(x, y, z)
-                }
-                else {
-                  continue
-                }
+              if (zbuffer && z<zbuffer.get(x, y)) {
+                zbuffer.set(x, y, z)
+              }
+              else {
+                continue
               }
               Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
             }

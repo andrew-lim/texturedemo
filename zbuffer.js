@@ -1,6 +1,6 @@
 class ZBuffer
 {
-  constructor(w, h, v=0)
+  constructor(w, h, v=Infinity)
   {
     this.w = w
     this.h = h
@@ -19,7 +19,7 @@ class ZBuffer
     return this.h
   }
 
-  clear(v=0)
+  clear(v=Infinity)
   {
     for (let x=0; x<this.w; ++x) {
       for (let y=0; y<this.h; ++y) {
