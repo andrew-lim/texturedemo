@@ -24,7 +24,7 @@ class ClipSpace
 
   @param src source point to lerp from
   @param dst destination point
-  @param ixyz Axis part - 0, 1, or 3
+  @param ixyz Axis part - 0 or 1 or 2 for x/y/z axis respectively
   @param planeSign Either 1 or -1
   */
   static findLerpFactor(src, dst, ixyz, planeSign)
