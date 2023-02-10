@@ -148,54 +148,56 @@ class TextureDemo
     let t = null
 
     // Note: all triangle vertices are defined counter-clockwise
+    // UV coordinates start from the bottom-left (0,0) of an image
+    // Top-right would be (1,1)
 
     // South
     t = Triangle.create(leftX, topY, frontZ, leftX, bottomY, frontZ, rightX, topY, frontZ, pink);
-    t.setTexUVs(0.0, 0.0, 0.0, 1.0, 1.0, 0.0);
+    t.setTexUVs(0.0, 1.0, 0.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
 
     t = Triangle.create(leftX, bottomY, frontZ, rightX, bottomY, frontZ, rightX, topY, frontZ, pink);
-    t.setTexUVs(0.0, 1.0, 1.0, 1.0, 1.0, 0.0);
+    t.setTexUVs(0.0, 0.0, 1.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
 
     // East
     t = Triangle.create(rightX, topY, frontZ, rightX, bottomY, frontZ, rightX, topY, backZ, green);
-    t.setTexUVs(0.0, 0.0, 0.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 1.0, 0.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
     t = Triangle.create(rightX, bottomY, frontZ, rightX, bottomY, backZ, rightX, topY, backZ, green);
-    t.setTexUVs(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 0.0, 1.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
 
     // North
     t = Triangle.create(rightX, topY, backZ, rightX, bottomY, backZ, leftX, topY, backZ, blue);
-    t.setTexUVs(0.0, 0.0, 0.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 1.0, 0.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
     t = Triangle.create(rightX, bottomY, backZ, leftX, bottomY, backZ, leftX, topY, backZ, blue);
-    t.setTexUVs(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 0.0, 1.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
 
     // West
     t = Triangle.create(leftX, topY, backZ, leftX, bottomY, backZ, leftX, topY, frontZ, red);
-    t.setTexUVs(0.0, 0.0, 0.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 1.0, 0.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
     t = Triangle.create(leftX, bottomY, backZ, leftX, bottomY, frontZ, leftX, topY, frontZ, red);
-    t.setTexUVs(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 0.0, 1.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
 
     // Top
     t = Triangle.create(leftX, topY, backZ, leftX, topY, frontZ, rightX, topY, backZ, yellow);
-    t.setTexUVs(0.0, 0.0, 0.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 1.0, 0.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
     t = Triangle.create(leftX, topY, frontZ, rightX, topY, frontZ, rightX, topY, backZ, yellow);
-    t.setTexUVs(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 0.0, 1.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
 
     // Bottom
     t = Triangle.create(leftX, bottomY, frontZ, leftX, bottomY, backZ, rightX, bottomY, frontZ, violet);
-    t.setTexUVs(0.0, 0.0, 0.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 1.0, 0.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
     t = Triangle.create(leftX, bottomY, backZ, rightX, bottomY, backZ, rightX, bottomY, frontZ, violet);
-    t.setTexUVs(0.0, 1.0, 1.0, 1.0, 1.0, 0.0)
+    t.setTexUVs(0.0, 0.0, 1.0, 0.0, 1.0, 1.0);
     mesh.addTriangle(t)
 
     // Rotate in local space around

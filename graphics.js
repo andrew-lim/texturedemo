@@ -47,16 +47,36 @@ class Graphics
       Graphics.setPixel(imageData, x, y, r, g, b, a)
     }
 
-    /**
-     * Like setPixel but does checking and truncating of passed in values to make sure
-     * they are integers
-     */
-    static getPixelF(imageData, fx, fy)
+    // Gets the pixel from an ImageData bitmap by converting UV coordinates
+    // to bitmap coordinates
+    static pixelAtUV(imageData, u, v)
     {
-      let x = Math.min(Math.trunc(fx*imageData.width), imageData.width-1);
-      let y = Math.min(Math.trunc(fy*imageData.height), imageData.height-1);
-      return Graphics.getPixel(imageData, x, y);
+      // UV coordinates start from the bottom-left of a texture
+      // But ImageData coordinates start from the top-left
+      // https://stackoverflow.com/a/33324409/1645045
+      v = 1.0-v;
+
+      const imageW = imageData.width;
+      const imageH = imageData.height;
+
+      let x = (u*imageW);
+      let y = (v*imageH);
+
+      // Wrap out of bounds coordinates
+      x = Math.trunc(x) % imageW;
+      y = Math.trunc(y) % imageH;
+
+      // Wrap negative coordinates
+      if (x<0) {
+        x = imageW - Math.abs(x);
+      }
+      if (y<0) {
+        y = imageH - Math.abs(y);
+      }
+
+      return  Graphics.getPixel(imageData, x, y)
     }
+
 
     /**
      * Draw a line using Bresenham's line algorithm
@@ -307,7 +327,7 @@ class Graphics
               const xsteps = x-left.x
               const u = left.u + xsteps * ustep
               const v = left.v + xsteps * vstep
-              const pixel = Graphics.getPixelF(textureImageData, u, v)
+              const pixel = Graphics.pixelAtUV(textureImageData, u, v)
               Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
             }
           }
@@ -352,7 +372,7 @@ class Graphics
               const xsteps = x-left.x
               const u = left.u + xsteps * ustep
               const v = left.v + xsteps * vstep
-              const pixel = Graphics.getPixelF(textureImageData, u, v)
+              const pixel = Graphics.pixelAtUV(textureImageData, u, v)
               Graphics.setPixel(imageData, x, y, pixel.r, pixel.g, pixel.b, pixel.a);
             }
           }
@@ -493,7 +513,7 @@ class Graphics
               const v = left.v + xsteps * vstep
               const w = left.w + xsteps * wstep
               const z = 1/w
-              const pixel = Graphics.getPixelF(textureImageData, u*z, v*z)
+              const pixel = Graphics.pixelAtUV(textureImageData, u*z, v*z)
               if (zbuffer && z<zbuffer.get(x, y)) {
                 zbuffer.set(x, y, z)
               }
@@ -551,7 +571,7 @@ class Graphics
               const v = left.v + xsteps * vstep
               const w = left.w + xsteps * wstep
               const z = 1/w
-              const pixel = Graphics.getPixelF(textureImageData, u*z, v*z)
+              const pixel = Graphics.pixelAtUV(textureImageData, u*z, v*z)
               if (zbuffer && z<zbuffer.get(x, y)) {
                 zbuffer.set(x, y, z)
               }
@@ -692,7 +712,7 @@ class Graphics
             tex_u = (1.0 - t) * tex_su + t * tex_eu;
             tex_v = (1.0 - t) * tex_sv + t * tex_ev;
             tex_w = (1.0 - t) * tex_sw + t * tex_ew;
-            let pixel = Graphics.getPixelF(textureImageData, tex_u / tex_w, tex_v / tex_w)
+            let pixel = Graphics.pixelAtUV(textureImageData, tex_u / tex_w, tex_v / tex_w)
             Graphics.setPixel(imageData, j, i, pixel.r, pixel.g, pixel.b, pixel.a);
             t += tstep;
           }
@@ -745,7 +765,7 @@ class Graphics
             tex_u = (1.0 - t) * tex_su + t * tex_eu;
             tex_v = (1.0 - t) * tex_sv + t * tex_ev;
             tex_w = (1.0 - t) * tex_sw + t * tex_ew;
-            let pixel = Graphics.getPixelF(textureImageData, tex_u / tex_w, tex_v / tex_w)
+            let pixel = Graphics.pixelAtUV(textureImageData, tex_u / tex_w, tex_v / tex_w)
             Graphics.setPixel(imageData, j, i, pixel.r, pixel.g, pixel.b, pixel.a);
             t += tstep;
           }
