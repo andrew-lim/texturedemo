@@ -12,6 +12,8 @@ class Graphics
      */
     static setPixel(imageData, x, y, r, g, b, a)
     {
+      x = Math.trunc(x)
+      y = Math.trunc(y)
       let index = (x + y * imageData.width) * 4
       imageData.data[index+0] = r
       imageData.data[index+1] = g
@@ -21,6 +23,8 @@ class Graphics
 
     static getPixel(imageData, x, y)
     {
+      x = Math.trunc(x)
+      y = Math.trunc(y)
       let index = (x + y * imageData.width) * 4;
       return {
         r : imageData.data[index+0],
@@ -77,6 +81,57 @@ class Graphics
       return  Graphics.getPixel(imageData, x, y)
     }
 
+    static clipLineToRect(x0, y0, x1, y1, xmin, ymin, xmax, ymax)
+    {
+      const a = [x0, y0]
+      const b = [x1, y1]
+      const mins = [xmin, ymin]
+      const maxs = [xmax, ymax]
+      const normals = [1, -1]
+
+      // 0 = x-axis
+      // 1 = y-axis
+      for (let axis=0; axis<=1; axis++) {
+        for (let plane=0; plane<2; ++plane) {
+          // Check both points
+          for (let pt=1; pt<=2; pt++) {
+            const pt1 = pt==1 ? a : b
+            const pt2 = pt==1 ? b : a
+
+            // If both points are outside the same plane, the line is
+            // outside the rectangle
+            if ( (a[0]<xmin && b[0]<xmin) || (a[0]>xmax && b[0]>xmax) ||
+                 (a[1]<ymin && b[1]<ymin) || (a[1]>ymax && b[1]>ymax)) {
+              return null
+            }
+
+            // normals[0] = 1   - check left/top plane
+            // normals[1] = -1  - check right/bottom plane
+            const n = normals[plane]
+
+            if ( (n==1 && pt1[axis]<mins[axis]) || (n==-1 && pt1[axis]>maxs[axis]) ) {
+              const p = (n==1) ? mins[axis] : maxs[axis]
+              const q1 = pt1[axis]
+              const q2 = pt2[axis]
+              const d1 = n * (q1-p)
+              const d2 = n * (q2-p)
+              const t = d1 / (d1-d2)
+              if (t<0 || t >1) {
+                throw "t is not between 0 and 1: " + t +" q1=" + q1 + " q2=" + q2 + " d1=" + d2 + " d2=" + d2
+              }
+              pt1[0] = Math.round(pt1[0] +  (pt2[0] - pt1[0]) * t )
+              pt1[1] = Math.round(pt1[1] +  (pt2[1] - pt1[1]) * t )
+            }
+          }
+        }
+      }
+
+      // The new clipped coordinates
+      return [
+        {x:a[0], y:a[1]},
+        {x:b[0], y:b[1]},
+      ]
+    }
 
     /**
      * Draw a line using Bresenham's line algorithm
@@ -85,6 +140,16 @@ class Graphics
      */
     static bline(imageData, x0, y0, x1, y1, rgba=[255,255,255,255])
     {
+      // let result = Graphics.clipToRect(x0, y0, x1, y1, 0, 0, imageData.width-1, imageData.height-1)
+      let result = Graphics.clipLineToRect(x0, y0, x1, y1, 0, 0, imageData.width-1, imageData.height-1)
+      if (!result) {
+        return
+      }
+      x0 = result[0].x
+      y0 = result[0].y
+      x1 = result[1].x
+      y1 = result[1].y
+
       x0 = Math.round(x0)
       y0 = Math.round(y0)
       x1 = Math.round(x1)
@@ -97,10 +162,7 @@ class Graphics
       let err = dx - dy;
 
       while(true) {
-        if (x0>=0 && y0>=0 && x0<imageData.width && y0<imageData.height) {
-          Graphics.setPixel(imageData, x0, y0, rgba[0], rgba[1], rgba[2], rgba[3]);
-        }
-
+        Graphics.setPixel(imageData, x0, y0, rgba[0], rgba[1], rgba[2], rgba[3]);
         if ((x0 === x1) && (y0 === y1)) break;
         let e2 = 2*err;
         if (e2 > -dy) { err -= dy; x0  += sx; }
