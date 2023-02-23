@@ -173,10 +173,10 @@ class Graphics
       x1 = result[1].x
       y1 = result[1].y
 
-      x0 = Math.round(x0)
-      y0 = Math.round(y0)
-      x1 = Math.round(x1)
-      y1 = Math.round(y1)
+      x0 = Math.trunc(x0)
+      y0 = Math.trunc(y0)
+      x1 = Math.trunc(x1)
+      y1 = Math.trunc(y1)
 
       let dx = Math.abs(x1 - x0);
       let dy = Math.abs(y1 - y0);
