@@ -83,26 +83,6 @@ class TextureDemo
   }
 
   /**
-   * Calculates the cross-product from 3 vertices but ignores the Z component
-   * Should be used in NDC space
-   *
-   * See https://stackoverflow.com/a/35280392/1645045
-   *
-   * Also see comment by "Arnon Marcus" in this video
-   * https://www.youtube.com/watch?v=h_Aqol0oTs4&lc=UgxpwWe8s2eGiRiBh054AaABAg&ab_channel=ChiliTomatoNoodle
-   */
-  crossProduct2D(a, b, c)
-  {
-    const ax = b[0] - a[0]
-    const bx = c[0] - a[0]
-    const ay = b[1] - a[1]
-    const by = c[1] - a[1]
-    // [ ax bx
-    //   ay by ]
-    return ax * by - ay * bx
-  }
-
-  /**
    * Chain mat4.multiply calls
    */
   multiplyMat4s(mat4s)
@@ -382,7 +362,7 @@ class TextureDemo
 
         // Backface Culling Check
         let backfaceCullingOn = document.getElementById("cb_backfaceCulling").checked
-        if (backfaceCullingOn && this.crossProduct2D(ndc1, ndc2, ndc3)<0) {
+        if (backfaceCullingOn && Graphics.crossProduct2D(ndc1, ndc2, ndc3)<0) {
           continue;
         }
 

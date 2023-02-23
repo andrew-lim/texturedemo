@@ -81,6 +81,29 @@ class Graphics
       return  Graphics.getPixel(imageData, x, y)
     }
 
+    /**
+     * Calculates the cross-product of 2 vectors but ignores the Z component
+     * Should be used in NDC space
+     *
+     * The 2 vectors are identified by 3 vertices a, b and c where a is the
+     * common point. First vector is (b-a) and second vector is (c-a)
+     *
+     * See https://stackoverflow.com/a/35280392/1645045
+     *
+     * Also see comment by "Arnon Marcus" in this video
+     * https://www.youtube.com/watch?v=h_Aqol0oTs4&lc=UgxpwWe8s2eGiRiBh054AaABAg
+     */
+    static crossProduct2D(a, b, c)
+    {
+      const ax = b[0] - a[0]
+      const bx = c[0] - a[0]
+      const ay = b[1] - a[1]
+      const by = c[1] - a[1]
+      // [ ax bx
+      //   ay by ]
+      return ax * by - ay * bx
+    }
+
     static clipLineToRect(x0, y0, x1, y1, xmin, ymin, xmax, ymax)
     {
       const a = [x0, y0]
