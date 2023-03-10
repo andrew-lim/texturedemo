@@ -27,7 +27,7 @@ class ClipSpace
   @param ixyz Axis part - 0 or 1 or 2 for x/y/z axis respectively
   @param planeSign Either 1 or -1
   */
-  static findLerpFactor(src, dst, ixyz, planeSign)
+  static signedDistanceRatio(src, dst, ixyz, planeSign)
   {
     // const N = -planeSign
     const d1 = (src.get(ixyz) - src.getW()*planeSign) // * N
@@ -82,8 +82,8 @@ class ClipSpace
       const c = outsidePoints[1]
       const ai = insideIndices[0]
       const bi = outsideIndices[0]
-      const bt = ClipSpace.findLerpFactor(b, a, ixyz, planeSign)
-      const ct = ClipSpace.findLerpFactor(c, a, ixyz, planeSign)
+      const bt = ClipSpace.signedDistanceRatio(b, a, ixyz, planeSign)
+      const ct = ClipSpace.signedDistanceRatio(c, a, ixyz, planeSign)
       const b1 = b.lerp(a, bt)
       const c1 = c.lerp(a, ct)
 
@@ -105,8 +105,8 @@ class ClipSpace
       const c = insidePoints[1]
       const ai = insideIndices[0]
       const bi = outsideIndices[0]
-      const abt = ClipSpace.findLerpFactor(b, a, ixyz, planeSign)
-      const cbt = ClipSpace.findLerpFactor(b, c, ixyz, planeSign)
+      const abt = ClipSpace.signedDistanceRatio(b, a, ixyz, planeSign)
+      const cbt = ClipSpace.signedDistanceRatio(b, c, ixyz, planeSign)
       const a1 = b.lerp(a, abt)
       const c1 = b.lerp(c, cbt)
 
