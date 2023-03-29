@@ -477,7 +477,7 @@ class Graphics
      * imageData is the ImageData to draw on
      * The x, y parameters are the triangle screen vertices
      * The u, v parameters are the respective texture coordinates
-     * The w parameters can be either the z or w values in clip space
+     * The w parameters are the w values in clip space before perspective division
      * (before perspective division)
      * textureImageData the ImageData holding the texture pixels
      */
