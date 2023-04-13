@@ -1,5 +1,5 @@
 /**
- * Clip space utilty class
+ * Clip space utility class
  *
  * Author: Andrew Lim
  * https://github.com/andrew-lim
@@ -66,11 +66,7 @@ class ClipSpace
       }
     }
 
-    if (3==outsidePoints.length) {
-      // Triangle is outside this plane
-    }
-
-    else if (3==insidePoints.length) {
+    if (3==insidePoints.length) {
       // Triangle is completely inside this plane
       triangles.push(triangle)
     }
