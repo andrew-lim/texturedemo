@@ -55,52 +55,80 @@ class Vector4f
   add(r)
   {
     if (r instanceof Vector4f) {
-      return new Vector4f(this.getX() + r.getX(), this.getY() + r.getY(), this.getZ() + r.getZ(), this.getW() + r.getW());
+      return new Vector4f(this.parts[0] + r.parts[0],
+                          this.parts[1] + r.parts[1],
+                          this.parts[2] + r.parts[2],
+                          this.parts[3] + r.parts[3]);
     }
-    return new Vector4f(this.getX() + r, this.getY() + r, this.getZ() + r, this.getW() + r);
+    return new Vector4f(this.parts[0] + r, this.parts[1] + r,
+                        this.parts[2] + r, this.parts[3] + r);
   }
 
   sub(r)
   {
     if (r instanceof Vector4f) {
-      return new Vector4f(this.getX() - r.getX(), this.getY() - r.getY(), this.getZ() - r.getZ(), this.getW() - r.getW());
+      return new Vector4f(this.parts[0] - r.parts[0],
+                          this.parts[1] - r.parts[1],
+                          this.parts[2] - r.parts[2],
+                          this.parts[3] - r.parts[3]);
     }
-    return new Vector4f(this.getX() - r, this.getY() - r, this.getZ() - r, this.getW() - r);
+    return new Vector4f(this.parts[0] - r, this.parts[1] - r,
+                        this.parts[2] - r, this.parts[3] - r);
   }
 
   mul(r)
   {
     if (r instanceof Vector4f) {
-      return new Vector4f(this.getX() * r.getX(), this.getY() * r.getY(), this.getZ() * r.getZ(), this.getW() * r.getW());
+      return new Vector4f(this.parts[0] * r.parts[0],
+                          this.parts[1] * r.parts[1],
+                          this.parts[2] * r.parts[2],
+                          this.parts[3] * r.parts[3]);
     }
-    return new Vector4f(this.getX() * r, this.getY() * r, this.getZ() * r, this.getW() * r);
+    return new Vector4f(this.parts[0] * r, this.parts[1] * r,
+                        this.parts[2] * r, this.parts[3] * r);
   }
 
   div(r)
   {
     if (r instanceof Vector4f) {
-      return new Vector4f(this.getX() / r.getX(), this.getY() / r.getY(), this.getZ() / r.getZ(), this.getW() / r.getW());
+      return new Vector4f(this.parts[0] / r.parts[0],
+                          this.parts[1] / r.parts[1],
+                          this.parts[2] / r.parts[2],
+                          this.parts[3] / r.parts[3]);
     }
-    return new Vector4f(this.getX() / r, this.getY() / r, this.getZ() / r, this.getW() / r);
+    return new Vector4f(this.parts[0] / r, this.parts[1] / r,
+                        this.parts[2] / r, this.parts[3] / r);
   }
 
   abs()
   {
-    return new Vector4f(Math.abs(this.getX()), Math.abs(this.getY()), Math.abs(this.getZ()), Math.abs(this.getW()));
+    return new Vector4f(Math.abs(this.parts[0]),
+                        Math.abs(this.parts[1]),
+                        Math.abs(this.parts[2]),
+                        Math.abs(this.parts[3]));
   }
 
   stringify()
   {
-    return "(" + this.getX() + ", " + this.getY() + ", " + this.getZ() + ", " + this.getW() + ")";
+    return "(" + this.parts[0] + ", "
+               + this.parts[1] + ", "
+               + this.parts[2] + ", "
+               + this.parts[3] + ")";
   }
 
   equals(r)
   {
-    return this.getX()==r.getX() && this.getY()==r.getY() && this.getZ()==r.getZ() && this.getW()==r.getW()
+    return this.parts[0]==r.parts[0] && this.parts[1]==r.parts[1] &&
+           this.parts[2]==r.parts[2] && this.parts[3]==r.parts[3]
   }
 
   lerp(dest, lerpFactor)
   {
-    return dest.sub(this).mul(lerpFactor).add(this)
+    return new Vector4f(
+      this.parts[0] + (dest.parts[0] - this.parts[0]) * lerpFactor,
+      this.parts[1] + (dest.parts[1] - this.parts[1]) * lerpFactor,
+      this.parts[2] + (dest.parts[2] - this.parts[2]) * lerpFactor,
+      this.parts[3] + (dest.parts[3] - this.parts[3]) * lerpFactor
+    );
   }
 }
