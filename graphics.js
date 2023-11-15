@@ -72,10 +72,10 @@ class Graphics
 
       // Wrap negative coordinates
       if (x<0) {
-        x = imageW - Math.abs(x);
+        x = imageW + x;
       }
       if (y<0) {
-        y = imageH - Math.abs(y);
+        y = imageH + y;
       }
 
       return  Graphics.getPixel(imageData, x, y)
